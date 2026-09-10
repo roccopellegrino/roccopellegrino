@@ -73,6 +73,7 @@ code,kbd,.mono{font-family:var(--f-mono); font-variant-ligatures:none}
 .themebtn:hover{color:var(--ink); border-color:var(--rule-strong)}
 
 .layout{display:grid; grid-template-columns:206px minmax(0,1fr); gap:34px; margin-top:26px; align-items:start}
+.layout>*{min-width:0}
 @media (max-width:900px){.layout{grid-template-columns:1fr; gap:20px}}
 
 /* ---------- rail ---------- */
@@ -348,8 +349,9 @@ ul.plain.human li::before{background:var(--accent)}
       <div class="navlist" id="navlist">
         <button type="button" data-view="ruta" aria-current="true"><span class="n">01</span>Ruta</button>
         <button type="button" data-view="lab"><span class="n">02</span>Lab SQL</button>
-        <button type="button" data-view="criterio"><span class="n">03</span>Criterio</button>
-        <button type="button" data-view="terreno"><span class="n">04</span>Terreno 2026</button>
+        <button type="button" data-view="sim"><span class="n">03</span>Simuladores</button>
+        <button type="button" data-view="criterio"><span class="n">04</span>Criterio</button>
+        <button type="button" data-view="terreno"><span class="n">05</span>Terreno 2026</button>
       </div>
       <div class="railbox">
         <span class="lbl">Tu avance</span>
@@ -367,95 +369,9 @@ ul.plain.human li::before{background:var(--accent)}
         <span class="eyebrow">01 &middot; La ruta</span>
         <h2>De cero a analista, en el orden que realmente importa</h2>
       </div>
-      <p class="lede">Casi todos arrancan por la herramienta y terminan sabiendo escribir queries que nadie pidió. El orden útil es al revés: <em>primero la pregunta</em>, después el dato, y la herramienta al final. Cada nivel de abajo tiene un criterio de salida concreto — no &laquo;vi el curso&raquo;, sino algo que podés hacer.</p>
-
-      <div class="track">
-
-        <article class="stage">
-          <div class="stage-mark"><span class="lvl">01</span><span class="wks">1&ndash;2 sem</span></div>
-          <div class="stage-body">
-            <h3>La pregunta antes que el dato</h3>
-            <p class="what">Traducir un pedido vago (&laquo;¿cómo venimos?&raquo;) a una pregunta que tiene una respuesta verificable: qué población, qué ventana de tiempo, qué se compara contra qué, y qué decisión cambia según el resultado. Definir métricas sin ambigüedad: numerador, denominador, granularidad, criterio de corte.</p>
-            <div class="chips"><span class="chip">definición de métrica</span><span class="chip">población y ventana</span><span class="chip">métrica vs. señal</span><span class="chip">árbol de KPIs</span></div>
-            <div class="done-when">
-              <span class="lbl">Listo cuando</span>
-              <p>Podés escribir la definición de &laquo;cliente activo&raquo; de tal forma que dos personas la implementen por separado y les dé el mismo número.</p>
-            </div>
-            <p class="trap"><b>Trampa</b>Empezar a consultar antes de escribir la pregunta. Si no sabés qué decisión depende del resultado, no estás analizando: estás generando tablas.</p>
-          </div>
-        </article>
-
-        <article class="stage">
-          <div class="stage-mark"><span class="lvl">02</span><span class="wks">3&ndash;5 sem</span></div>
-          <div class="stage-body">
-            <h3>SQL: filtrar, agrupar, no mentirte</h3>
-            <p class="what"><code>SELECT / WHERE / GROUP BY / HAVING / ORDER BY</code>, agregaciones, <code>CASE WHEN</code>, manejo de <code>NULL</code>, y el orden real de ejecución (<code>FROM &rarr; WHERE &rarr; GROUP BY &rarr; HAVING &rarr; SELECT &rarr; ORDER BY</code>), que es lo que explica el 80% de los errores de principiante.</p>
-            <div class="chips"><span class="chip">agregaciones</span><span class="chip">NULL</span><span class="chip">CASE WHEN</span><span class="chip">orden de ejecución</span><span class="chip">tipos y casting</span></div>
-            <div class="done-when">
-              <span class="lbl">Listo cuando</span>
-              <p>Explicás sin dudar por qué <code>COUNT(columna)</code> y <code>COUNT(*)</code> dan distinto, y por qué un filtro sobre un agregado va en <code>HAVING</code> y no en <code>WHERE</code>.</p>
-            </div>
-            <p class="trap"><b>Trampa</b>Promediar promedios. El promedio de los promedios diarios no es el promedio del período salvo que todos los días pesen igual.</p>
-          </div>
-        </article>
-
-        <article class="stage">
-          <div class="stage-mark"><span class="lvl">03</span><span class="wks">4&ndash;6 sem</span></div>
-          <div class="stage-body">
-            <h3>SQL de analista: joins, ventanas, cohortes</h3>
-            <p class="what">Los cuatro <code>JOIN</code> y qué le pasa al conteo de filas con cada uno (el <em>fan-out</em> silencioso que infla la facturación). Funciones de ventana: <code>ROW_NUMBER</code>, <code>LAG</code>, <code>SUM() OVER</code>, medias móviles, máximos acumulados. CTEs para partir un problema en pasos legibles. Análisis de cohortes y retención.</p>
-            <div class="chips"><span class="chip">LEFT / INNER / anti-join</span><span class="chip">window functions</span><span class="chip">CTE</span><span class="chip">retención por cohorte</span><span class="chip">self-join</span></div>
-            <div class="done-when">
-              <span class="lbl">Listo cuando</span>
-              <p>Armás una tabla de retención mes a mes desde cero y detectás un fan-out mirando el conteo de filas antes y después de un join.</p>
-            </div>
-            <p class="trap"><b>Trampa</b>Un <code>LEFT JOIN</code> con condición en el <code>WHERE</code> en vez del <code>ON</code>: lo convertís en <code>INNER JOIN</code> sin darte cuenta y perdés justo las filas que querías conservar.</p>
-          </div>
-        </article>
-
-        <article class="stage">
-          <div class="stage-mark"><span class="lvl">04</span><span class="wks">4&ndash;6 sem</span></div>
-          <div class="stage-body">
-            <h3>La estadística que se usa (y sólo esa)</h3>
-            <p class="what">Distribuciones y por qué la mediana le gana a la media en datos de plata. Variabilidad: desvío, percentiles, outliers. Incertidumbre: intervalos de confianza y tamaño de muestra. Tests A/B leídos bien: qué significa un p-valor, qué es el efecto mínimo detectable, y por qué mirar el test todos los días lo rompe. Correlación, regresión simple, y confusión.</p>
-            <div class="chips"><span class="chip">mediana y percentiles</span><span class="chip">intervalo de confianza</span><span class="chip">A/B testing</span><span class="chip">Simpson</span><span class="chip">sesgo de selección</span><span class="chip">regresión lineal</span></div>
-            <div class="done-when">
-              <span class="lbl">Listo cuando</span>
-              <p>Ante un resultado &laquo;+8% con p = 0,04&raquo; preguntás primero cuántas variantes se probaron y cuándo se decidió parar el test.</p>
-            </div>
-            <p class="trap"><b>Trampa</b>Confundir significancia estadística con relevancia de negocio. Con muestra grande, todo da significativo; la pregunta es si el efecto paga el costo de implementarlo.</p>
-          </div>
-        </article>
-
-        <article class="stage">
-          <div class="stage-mark"><span class="lvl">05</span><span class="wks">3&ndash;4 sem</span></div>
-          <div class="stage-body">
-            <h3>Visualización y la conversación difícil</h3>
-            <p class="what">Elegir la forma según el trabajo del dato: magnitud, composición, cambio en el tiempo, relación. Escalas honestas, ejes que empiezan donde deben, y color como codificación y no como decoración. Después, lo que separa a un analista senior: presentar el hallazgo con la recomendación adelante, la incertidumbre declarada y el próximo paso definido.</p>
-            <div class="chips"><span class="chip">forma según el dato</span><span class="chip">escalas honestas</span><span class="chip">color como código</span><span class="chip">executive summary</span><span class="chip">Power BI / Looker</span></div>
-            <div class="done-when">
-              <span class="lbl">Listo cuando</span>
-              <p>Tu reporte se puede leer en 30 segundos y en 30 minutos: la conclusión y la acción arriba, el método y los supuestos abajo.</p>
-            </div>
-            <p class="trap"><b>Trampa</b>El dashboard de 40 gráficos. Si no hay una jerarquía que diga qué mirar primero, nadie mira nada.</p>
-          </div>
-        </article>
-
-        <article class="stage">
-          <div class="stage-mark"><span class="lvl">06</span><span class="wks">continuo</span></div>
-          <div class="stage-body">
-            <h3>Python, el stack y la reproducibilidad</h3>
-            <p class="what">Python cuando SQL se queda corto: <code>pandas</code>/<code>polars</code> para transformaciones que no entran en una query, notebooks para explorar, scripts para lo que se repite. Git como higiene básica. Modelado en capas y tests sobre los datos (<code>dbt</code>): definir la métrica una vez, versionarla, y que todo lo demás la consuma.</p>
-            <div class="chips"><span class="chip">pandas / polars</span><span class="chip">Git</span><span class="chip">dbt</span><span class="chip">capa semántica</span><span class="chip">DuckDB</span><span class="chip">tests de datos</span></div>
-            <div class="done-when">
-              <span class="lbl">Listo cuando</span>
-              <p>Alguien corre tu análisis seis meses después, sobre datos nuevos, y le da lo mismo que a vos — sin que le expliques nada.</p>
-            </div>
-            <p class="trap"><b>Trampa</b>Saltar acá desde el nivel 1 porque suena más profesional. Un analista que sabe dbt pero no sabe definir una métrica produce pipelines prolijos de números equivocados.</p>
-          </div>
-        </article>
-
-      </div>
+      <p class="lede">Casi todos arrancan por la herramienta y terminan sabiendo escribir queries que nadie pidió. El orden útil es al revés: <em>primero la pregunta</em>, después el dato, y la herramienta al final. Tildá lo que ya manejás &mdash; la ruta lleva la cuenta.</p>
+      <div id="diagnostico"></div>
+      <div class="track" id="track"></div>
     </section>
 
     <!-- ================= LAB ================= -->
@@ -506,10 +422,20 @@ ul.plain.human li::before{background:var(--accent)}
       </div>
     </section>
 
+    <!-- ================= SIMULADORES ================= -->
+    <section class="view" id="view-sim" hidden>
+      <div class="sec-h">
+        <span class="eyebrow">03 &middot; Simuladores</span>
+        <h2>Perillas para romper el concepto y ver qué pasa</h2>
+      </div>
+      <p class="lede">Cinco cosas que se explican mal con palabras y se entienden en diez segundos moviendo un control. <em>Rompelos a propósito</em>: llevá los parámetros a los extremos y mirá qué se desarma.</p>
+      <div id="sims" style="display:flex; flex-direction:column; gap:26px"></div>
+    </section>
+
     <!-- ================= CRITERIO ================= -->
     <section class="view" id="view-criterio" hidden>
       <div class="sec-h">
-        <span class="eyebrow">03 &middot; Criterio</span>
+        <span class="eyebrow">04 &middot; Criterio</span>
         <h2>Los casos donde el SQL está bien y la conclusión está mal</h2>
       </div>
       <p class="lede">Esta es la parte que no se automatizó. En cada caso el número es correcto: lo que está en juego es <em>qué significa</em> y qué harías con él. Elegí y después leé por qué las otras opciones fallan — ahí está el aprendizaje, no en acertar.</p>
@@ -519,7 +445,7 @@ ul.plain.human li::before{background:var(--accent)}
     <!-- ================= TERRENO ================= -->
     <section class="view" id="view-terreno" hidden>
       <div class="sec-h">
-        <span class="eyebrow">04 &middot; Terreno 2026</span>
+        <span class="eyebrow">05 &middot; Terreno 2026</span>
         <h2>Cómo está el rol hoy, sin marketing de bootcamp</h2>
       </div>
       <p class="lede">Datos de relevamientos publicados en 2026 sobre avisos reales y sobre el impacto de la IA en el día a día del puesto. Las fuentes están al pie: son artículos de industria, no papers — <em>tomá los números como orden de magnitud</em>, no como verdad exacta.</p>
@@ -1107,6 +1033,87 @@ const CASES = [
 </script>
 <script>
 /* =====================================================================
+   La ruta como datos: habilidades tildables y test de ubicación
+   ===================================================================== */
+const PATH = [
+{n:1, weeks:'1–2 sem', title:'La pregunta antes que el dato',
+ what:'Traducir un pedido vago (&laquo;¿cómo venimos?&raquo;) a una pregunta con respuesta verificable: qué población, qué ventana de tiempo, qué se compara contra qué, y qué decisión cambia según el resultado. Definir métricas sin ambigüedad: numerador, denominador, granularidad, criterio de corte.',
+ skills:['definir una métrica','población y ventana','árbol de KPIs','métrica vs. señal','qué decisión depende'],
+ done:'Podés escribir la definición de &laquo;cliente activo&raquo; de tal forma que dos personas la implementen por separado y les dé el mismo número.',
+ trap:'Empezar a consultar antes de escribir la pregunta. Si no sabés qué decisión depende del resultado, no estás analizando: estás generando tablas.'},
+{n:2, weeks:'3–5 sem', title:'SQL: filtrar, agrupar, no mentirte',
+ what:'<code>SELECT / WHERE / GROUP BY / HAVING / ORDER BY</code>, agregaciones, <code>CASE WHEN</code>, manejo de <code>NULL</code>, y el orden real de ejecución (<code>FROM &rarr; WHERE &rarr; GROUP BY &rarr; HAVING &rarr; SELECT &rarr; ORDER BY</code>), que explica el 80% de los errores de principiante.',
+ skills:['GROUP BY','HAVING vs WHERE','NULL y COUNT','CASE WHEN','orden de ejecución','tipos y casting'],
+ done:'Explicás sin dudar por qué <code>COUNT(columna)</code> y <code>COUNT(*)</code> dan distinto, y por qué un filtro sobre un agregado va en <code>HAVING</code>.',
+ trap:'Promediar promedios. El promedio de los promedios diarios no es el promedio del período salvo que todos los días pesen igual.'},
+{n:3, weeks:'4–6 sem', title:'SQL de analista: joins, ventanas, cohortes',
+ what:'Los cuatro <code>JOIN</code> y qué le pasa al conteo de filas con cada uno (el <em>fan-out</em> silencioso que infla la facturación). Funciones de ventana: <code>ROW_NUMBER</code>, <code>LAG</code>, <code>SUM() OVER</code>, medias móviles, máximos acumulados. CTEs para partir un problema en pasos legibles. Cohortes y retención.',
+ skills:['LEFT vs INNER','anti-join','fan-out','ROW_NUMBER','LAG / LEAD','ventanas deslizantes','CTE','cohortes'],
+ done:'Armás una tabla de retención mes a mes desde cero y detectás un fan-out mirando el conteo de filas antes y después de un join.',
+ trap:'Un <code>LEFT JOIN</code> con la condición en el <code>WHERE</code> en vez del <code>ON</code>: lo convertís en <code>INNER JOIN</code> sin darte cuenta y perdés justo las filas que querías conservar.'},
+{n:4, weeks:'4–6 sem', title:'La estadística que se usa (y sólo esa)',
+ what:'Distribuciones y por qué la mediana le gana a la media en datos de plata. Variabilidad: desvío, percentiles, outliers. Incertidumbre: intervalos de confianza y tamaño de muestra. Tests A/B leídos bien: qué significa un p-valor, cuál es el efecto mínimo detectable, y por qué mirar el test todos los días lo rompe. Correlación, regresión simple y confusión.',
+ skills:['mediana y percentiles','desvío y outliers','intervalo de confianza','p-valor','tamaño de muestra','peeking','Simpson','sesgo de selección','regresión simple'],
+ done:'Ante un resultado &laquo;+8% con p = 0,04&raquo; preguntás primero cuántas variantes se probaron y cuándo se decidió parar el test.',
+ trap:'Confundir significancia estadística con relevancia de negocio. Con muestra grande todo da significativo; la pregunta es si el efecto paga el costo de implementarlo.'},
+{n:5, weeks:'3–4 sem', title:'Visualización y la conversación difícil',
+ what:'Elegir la forma según el trabajo del dato: magnitud, composición, cambio en el tiempo, relación. Escalas honestas, ejes que empiezan donde deben, color como codificación y no como decoración. Y después, lo que separa a un senior: presentar el hallazgo con la recomendación adelante, la incertidumbre declarada y el próximo paso definido.',
+ skills:['forma según el dato','escalas honestas','color como código','jerarquía visual','executive summary','una herramienta de BI'],
+ done:'Tu reporte se puede leer en 30 segundos y en 30 minutos: la conclusión y la acción arriba, el método y los supuestos abajo.',
+ trap:'El dashboard de 40 gráficos. Si no hay una jerarquía que diga qué mirar primero, nadie mira nada.'},
+{n:6, weeks:'continuo', title:'Python, el stack y la reproducibilidad',
+ what:'Python cuando SQL se queda corto: <code>pandas</code>/<code>polars</code> para transformaciones que no entran en una query, notebooks para explorar, scripts para lo que se repite. Git como higiene básica. Modelado en capas y tests sobre los datos (<code>dbt</code>): definir la métrica una vez, versionarla, y que todo lo demás la consuma.',
+ skills:['pandas','Git','dbt','capa semántica','DuckDB','tests de datos'],
+ done:'Alguien corre tu análisis seis meses después, sobre datos nuevos, y le da lo mismo que a vos — sin que le expliques nada.',
+ trap:'Saltar acá desde el nivel 1 porque suena más profesional. Un analista que sabe dbt pero no sabe definir una métrica produce pipelines prolijos de números equivocados.'}
+];
+const SKILL_TOTAL = PATH.reduce((a,s)=>a+s.skills.length,0);
+
+const DIAG = [
+{lvl:1, q:'Te piden &laquo;cuántos clientes activos tenemos&raquo;. ¿Cuál es el primer paso?',
+ opts:[{t:'Escribir la query contando clientes con al menos una compra.',ok:false},
+       {t:'Preguntar qué cuenta como activo: qué acción, en qué ventana, y para qué decisión se va a usar.',ok:true},
+       {t:'Mirar cómo lo calculó el reporte del mes pasado y replicarlo.',ok:false}],
+ why:'&laquo;Activo&raquo; no es un dato, es una definición. Sin fijarla, dos personas devuelven dos números y ninguno está mal.'},
+{lvl:2, q:'En una tabla de 1.000 filas donde 300 tienen <code>email</code> en <code>NULL</code>: ¿qué devuelven <code>COUNT(*)</code> y <code>COUNT(email)</code>?',
+ opts:[{t:'1.000 y 1.000 — <code>COUNT</code> siempre cuenta filas.',ok:false},
+       {t:'1.000 y 700 — <code>COUNT(columna)</code> ignora los <code>NULL</code>.',ok:true},
+       {t:'700 y 700 — las filas con <code>NULL</code> no se cuentan.',ok:false}],
+ why:'<code>COUNT(*)</code> cuenta filas; <code>COUNT(col)</code> cuenta valores no nulos. Es la fuente silenciosa de denominadores mal calculados.'},
+{lvl:2, q:'Querés quedarte sólo con los países que facturaron más de 100.000. ¿Dónde va ese filtro?',
+ opts:[{t:'En el <code>WHERE</code>, junto con los demás filtros.',ok:false},
+       {t:'En el <code>HAVING</code>, porque filtra sobre un agregado ya calculado.',ok:true},
+       {t:'En una subconsulta: no se puede filtrar por una suma.',ok:false}],
+ why:'<code>WHERE</code> filtra filas antes de agrupar; <code>HAVING</code> filtra grupos después. El orden de ejecución lo explica todo.'},
+{lvl:3, q:'Hacés <code>LEFT JOIN pedidos</code> y agregás <code>WHERE pedidos.estado = \'completado\'</code>. ¿Qué pasa con los clientes sin pedidos?',
+ opts:[{t:'Se conservan con <code>NULL</code>, para eso es el <code>LEFT JOIN</code>.',ok:false},
+       {t:'Desaparecen: el filtro descarta sus <code>NULL</code> y el join se vuelve un <code>INNER</code> de hecho.',ok:true},
+       {t:'Se conservan sólo si tienen algún pedido en otro estado.',ok:false}],
+ why:'La condición sobre la tabla derecha va en el <code>ON</code>. En el <code>WHERE</code> se aplica después del join y elimina las filas rellenadas con <code>NULL</code>.'},
+{lvl:3, q:'Necesitás, para cada día, el promedio de los 7 días anteriores. Sin subconsultas ni self-joins.',
+ opts:[{t:'No se puede: un agregado colapsa las filas.',ok:false},
+       {t:'<code>AVG(x) OVER (ORDER BY fecha ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)</code>.',ok:true},
+       {t:'<code>GROUP BY</code> por semana y después repartir el promedio.',ok:false}],
+ why:'Las funciones de ventana agregan sin colapsar filas. Es la herramienta que separa el SQL básico del SQL de analista.'},
+{lvl:4, q:'Un test da <b>+8% con p = 0,04</b>. ¿Qué preguntás antes de festejar?',
+ opts:[{t:'Cuántas métricas y segmentos se miraron, y cuándo se decidió cortar el test.',ok:true},
+       {t:'Si el 8% se sostiene también en el mes siguiente.',ok:false},
+       {t:'Si el tamaño de muestra superó los 1.000 usuarios por rama.',ok:false}],
+ why:'El p-valor sólo significa algo si la hipótesis y el criterio de corte se fijaron antes de mirar. Con muchos cortes y parada libre, 0,04 no dice casi nada.'},
+{lvl:4, q:'El ticket promedio sube 12% y la mediana baja 4%. ¿Qué está pasando?',
+ opts:[{t:'Hay un error: no pueden moverse en direcciones opuestas.',ok:false},
+       {t:'La distribución se estiró por la derecha: el cliente típico gasta menos y unos pocos gastan mucho más.',ok:true},
+       {t:'Subieron los precios de forma pareja en todo el catálogo.',ok:false}],
+ why:'Media y mediana divergiendo es la señal más barata de que cambió la <em>forma</em> de la distribución, no sólo su nivel.'},
+{lvl:6, q:'El dashboard, el reporte mensual y el asistente de IA devuelven tres cifras distintas de &laquo;ingreso neto&raquo;. ¿Cuál es el arreglo de fondo?',
+ opts:[{t:'Corregir las tres consultas para que coincidan y avisar al equipo.',ok:false},
+       {t:'Definir la métrica una sola vez en el modelo, versionada y testeada, y que las tres la consuman.',ok:true},
+       {t:'Elegir el dashboard como fuente oficial y deprecar los otros dos.',ok:false}],
+ why:'Es exactamente el problema que resuelven <code>dbt</code> y la capa semántica: una definición, en código, que todo lo demás consume.'}
+];
+</script>
+<script>
+/* =====================================================================
    Motor: SQLite (build asm.js, sin descarga de wasm) + comparación de resultados
    ===================================================================== */
 const SOURCES = [
@@ -1265,22 +1272,25 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 
 EXERCISES.forEach((e,i)=>{ e.id = e.db+'-'+i; });
 const KEY='qc-progress-v1';
-const state = {db:'mercado', idx:0, solved:new Set(), cases:{}, drafts:{}};
+const state = {db:'mercado', idx:0, solved:new Set(), cases:{}, drafts:{}, skills:new Set(), diag:null};
 
 function save(){
-  try{ localStorage.setItem(KEY, JSON.stringify({solved:[...state.solved], cases:state.cases})); }catch(e){}
+  try{ localStorage.setItem(KEY, JSON.stringify({solved:[...state.solved], cases:state.cases,
+    skills:[...state.skills], diag:state.diag})); }catch(e){}
 }
 function load(){
   try{
     const raw=localStorage.getItem(KEY); if(!raw) return;
     const o=JSON.parse(raw);
     (o.solved||[]).forEach(id=>state.solved.add(id));
+    (o.skills||[]).forEach(id=>state.skills.add(id));
     state.cases = o.cases||{};
+    state.diag = o.diag ?? null;
   }catch(e){}
 }
 function meter(){
-  const total = EXERCISES.length + CASES.length;
-  const done  = state.solved.size + Object.keys(state.cases).length;
+  const total = EXERCISES.length + CASES.length + SKILL_TOTAL;
+  const done  = state.solved.size + Object.keys(state.cases).length + state.skills.size;
   $('#meter-fill').style.width = (total? done/total*100 : 0)+'%';
   $('#meter-num').textContent = done+' / '+total;
 }
@@ -1312,7 +1322,7 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{ if(DB
 $$('#navlist button').forEach(b=>b.addEventListener('click',()=>{
   const v=b.dataset.view;
   $$('#navlist button').forEach(x=>x.setAttribute('aria-current', x===b?'true':'false'));
-  ['ruta','lab','criterio','terreno'].forEach(k=>{ $('#view-'+k).hidden = (k!==v); });
+  ['ruta','lab','sim','criterio','terreno'].forEach(k=>{ $('#view-'+k).hidden = (k!==v); });
   window.scrollTo({top:0, behavior:'instant'});
 }));
 
@@ -1633,7 +1643,8 @@ function renderCases(){
 
 /* ------------------------------ arranque ------------------------------ */
 $('#reset-progress').addEventListener('click',()=>{
-  state.solved.clear(); state.cases={}; save(); meter(); renderCases();
+  state.solved.clear(); state.cases={}; state.skills.clear(); state.diag=null;
+  save(); meter(); renderCases(); renderDiag(); renderPath();
   if(DB.mercado){ renderEx(); }
 });
 
@@ -1656,4 +1667,592 @@ load(); meter(); renderCases();
     $('#boot').classList.remove('loading');
   }
 })();
+</script>
+<style>
+/* ---------- diagnóstico ---------- */
+.diag{background:var(--surface); border:1px solid var(--rule); border-radius:9px; box-shadow:var(--shadow); padding:18px 20px;
+  display:flex; flex-direction:column; gap:14px}
+.diag-h{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.diag-h h3{font-size:17.5px}
+.diag-q{display:flex; flex-direction:column; gap:10px}
+.diag-q .qtext{font-size:16.5px; line-height:1.5; max-width:64ch}
+.diag-opts{display:flex; flex-direction:column; gap:7px; max-width:62ch}
+.diag-opts button{text-align:left; cursor:pointer; background:var(--surface-2); border:1px solid var(--rule);
+  border-radius:7px; padding:10px 13px; font-family:var(--f-body); font-size:15.5px; line-height:1.45; color:var(--ink)}
+.diag-opts button:hover{border-color:var(--accent); background:var(--accent-soft)}
+.diag-prog{display:flex; gap:4px; align-items:center}
+.diag-prog i{width:16px; height:4px; border-radius:99px; background:var(--rule); display:block}
+.diag-prog i.on{background:var(--accent)}
+.diag-prog i.cur{background:var(--rust)}
+.verdictbox{display:flex; flex-direction:column; gap:9px}
+.verdictbox .big{font-family:var(--f-display); font-size:23px; font-weight:700; color:var(--accent); line-height:1.2}
+.verdictbox .exp{font-size:15.5px; color:var(--ink-2); line-height:1.5; max-width:62ch}
+.diag-review{display:flex; flex-direction:column; gap:7px; border-top:1px solid var(--rule); padding-top:12px}
+.diag-review .row{display:flex; gap:9px; align-items:flex-start; font-size:14px; line-height:1.45}
+.diag-review .mk{font-family:var(--f-mono); font-size:11px; flex:0 0 auto; padding:1px 6px; border-radius:4px; margin-top:2px}
+.diag-review .mk.y{background:var(--accent-soft); color:var(--good)}
+.diag-review .mk.n{background:var(--rust-soft); color:var(--rust)}
+
+/* ---------- checklist de la ruta ---------- */
+.stage.is-done .stage-mark .lvl{opacity:.5}
+.skills{display:flex; flex-wrap:wrap; gap:6px}
+.skill{display:inline-flex; align-items:center; gap:7px; cursor:pointer; font-family:var(--f-mono); font-size:11.5px;
+  padding:4px 9px 4px 7px; border-radius:5px; background:var(--surface-2); border:1px solid var(--rule); color:var(--ink-2)}
+.skill:hover{border-color:var(--rule-strong); color:var(--ink)}
+.skill .bx{width:12px; height:12px; border-radius:3px; border:1.5px solid var(--rule-strong); display:inline-block;
+  flex:0 0 auto; position:relative}
+.skill[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+.skill[aria-pressed="true"] .bx{background:var(--accent); border-color:var(--accent)}
+.skill[aria-pressed="true"] .bx::after{content:""; position:absolute; left:3px; top:.5px; width:3.5px; height:7px;
+  border:solid #fff; border-width:0 2px 2px 0; transform:rotate(42deg)}
+.stage-prog{display:flex; align-items:center; gap:8px; margin-top:2px}
+.stage-prog .bar{flex:1; max-width:150px; height:4px; background:var(--rule); border-radius:99px; overflow:hidden}
+.stage-prog .bar i{display:block; height:100%; background:var(--accent); transition:width .25s ease}
+.stage-prog .txt{font-family:var(--f-mono); font-size:11px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.stage-mark .badge{font-family:var(--f-mono); font-size:9.5px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--accent); background:var(--accent-soft); border-radius:4px; padding:2px 5px}
+.stage.is-here{background:linear-gradient(90deg, var(--accent-soft), transparent 62%); border-radius:8px;
+  padding-inline:12px; margin-inline:-12px}
+
+/* ---------- simuladores ---------- */
+.sim{background:var(--surface); border:1px solid var(--rule); border-radius:9px; box-shadow:var(--shadow); overflow:hidden}
+.sim-h{padding:15px 18px; border-bottom:1px solid var(--rule); display:flex; flex-direction:column; gap:5px}
+.sim-h h3{font-size:17.5px}
+.sim-h .q{font-size:14.5px; color:var(--ink-2); line-height:1.5; max-width:70ch}
+.sim-b{padding:18px; display:grid; grid-template-columns:212px minmax(0,1fr); gap:22px; align-items:start}
+@media (max-width:760px){.sim-b{grid-template-columns:1fr; gap:16px}}
+.ctrls{display:flex; flex-direction:column; gap:15px}
+.ctrl{display:flex; flex-direction:column; gap:6px}
+.ctrl .top{display:flex; align-items:baseline; justify-content:space-between; gap:8px}
+.ctrl .cname{font-family:var(--f-display); font-size:12px; font-weight:600; color:var(--ink-2)}
+.ctrl .cval{font-family:var(--f-mono); font-size:12.5px; color:var(--accent); font-variant-numeric:tabular-nums; font-weight:500}
+input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:4px; border-radius:99px;
+  background:var(--rule-strong); outline:none; cursor:pointer; margin:6px 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+  background:var(--accent); border:2px solid var(--surface); box-shadow:0 0 0 1px var(--rule-strong); cursor:grab}
+input[type=range]::-moz-range-thumb{width:16px; height:16px; border-radius:50%; background:var(--accent);
+  border:2px solid var(--surface); box-shadow:0 0 0 1px var(--rule-strong); cursor:grab}
+.simout{display:flex; flex-direction:column; gap:13px; min-width:0}
+.readout{display:grid; grid-template-columns:repeat(auto-fit,minmax(112px,1fr)); gap:1px; background:var(--rule);
+  border:1px solid var(--rule); border-radius:8px; overflow:hidden}
+.readout .cell{background:var(--surface-2); padding:10px 12px; display:flex; flex-direction:column; gap:3px}
+.readout .cell .k{font-family:var(--f-display); font-size:10.5px; font-weight:700; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--ink-3)}
+.readout .cell .v{font-family:var(--f-mono); font-size:18px; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; line-height:1.1}
+.readout .cell .v.pos{color:var(--good)} .readout .cell .v.neg{color:var(--rust)}
+.readout .cell .s{font-family:var(--f-mono); font-size:10.5px; color:var(--ink-3)}
+.verdictline{font-size:15px; line-height:1.5; padding:11px 13px; border-radius:8px; background:var(--surface-2);
+  border-left:2px solid var(--accent); max-width:74ch}
+.verdictline.hot{border-left-color:var(--rust); background:var(--rust-soft)}
+.verdictline b{font-weight:600}
+.simbtns{display:flex; gap:8px; flex-wrap:wrap}
+.simbtn{font-family:var(--f-display); font-size:12.5px; font-weight:600; cursor:pointer; border-radius:6px;
+  padding:7px 12px; border:1px solid var(--rule); background:var(--surface); color:var(--ink-2)}
+.simbtn:hover{color:var(--ink); border-color:var(--rule-strong)}
+.simbtn.go{background:var(--accent); border-color:transparent; color:#fff}
+.simbtn.go:hover{filter:brightness(1.08); color:#fff}
+.tally{display:flex; flex-wrap:wrap; gap:16px; font-family:var(--f-mono); font-size:12px; color:var(--ink-2);
+  border-top:1px solid var(--rule); padding-top:11px; font-variant-numeric:tabular-nums}
+.tally b{color:var(--ink); font-weight:600}
+.tally .warn{color:var(--rust)}
+
+/* ---------- joins ---------- */
+.joinpick{display:flex; flex-wrap:wrap; gap:5px}
+.joinpick button{font-family:var(--f-mono); font-size:12px; cursor:pointer; border-radius:6px; padding:6px 11px;
+  border:1px solid var(--rule); background:var(--surface-2); color:var(--ink-2)}
+.joinpick button:hover{border-color:var(--rule-strong); color:var(--ink)}
+.joinpick button[aria-pressed="true"]{background:var(--accent); border-color:transparent; color:#fff; font-weight:500}
+.jgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px}
+table.mini{border-collapse:collapse; width:100%; font-family:var(--f-mono); font-size:11.5px; font-variant-numeric:tabular-nums}
+table.mini caption{font-family:var(--f-display); font-size:11px; font-weight:700; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--ink-3); text-align:left; padding-bottom:6px}
+table.mini th{text-align:left; font-weight:600; color:var(--ink-3); padding:5px 8px; border-bottom:1px solid var(--rule-strong)}
+table.mini td{padding:5px 8px; border-bottom:1px solid var(--rule); color:var(--ink)}
+table.mini tr.hit td{background:var(--accent-soft)}
+table.mini tr.miss td{opacity:.42}
+table.mini tr.dup td{background:var(--rust-soft)}
+table.mini td.nul{color:var(--ink-3); font-style:italic}
+.jkey{display:flex; flex-wrap:wrap; gap:13px; font-family:var(--f-mono); font-size:11px; color:var(--ink-3)}
+.jkey span{display:inline-flex; align-items:center; gap:5px}
+.jkey i{width:26px; height:13px; border-radius:3px; display:block; border:1px solid var(--rule)}
+</style>
+<script>
+/* =====================================================================
+   Ruta tildable + test de ubicación
+   ===================================================================== */
+let diagStep=-1, diagAns=[];
+function levelDone(st){ return st.skills.filter((_,k)=>state.skills.has(st.n+':'+k)).length; }
+
+function renderPath(){
+  const rec = state.diag ? state.diag.level : null;
+  $('#track').innerHTML = PATH.map(st=>{
+    const got=levelDone(st), all=st.skills.length, full=got===all;
+    const here = rec===st.n;
+    return `<article class="stage ${full?'is-done':''} ${here?'is-here':''}">
+      <div class="stage-mark">
+        <span class="lvl">0${st.n}</span>
+        <span class="wks">${st.weeks}</span>
+        ${here?'<span class="badge">empezá acá</span>':''}
+      </div>
+      <div class="stage-body">
+        <h3>${st.title}</h3>
+        <p class="what">${st.what}</p>
+        <div class="skills">${st.skills.map((sk,k)=>{
+          const on=state.skills.has(st.n+':'+k);
+          return `<button type="button" class="skill" aria-pressed="${on}" data-sk="${st.n}:${k}">
+            <span class="bx"></span>${sk}</button>`;
+        }).join('')}</div>
+        <div class="stage-prog">
+          <span class="bar"><i style="width:${all?got/all*100:0}%"></i></span>
+          <span class="txt">${got}/${all}${full?' &middot; completo':''}</span>
+        </div>
+        <div class="done-when"><span class="lbl">Listo cuando</span><p>${st.done}</p></div>
+        <p class="trap"><b>Trampa</b>${st.trap}</p>
+      </div>
+    </article>`;
+  }).join('');
+  $$('#track .skill').forEach(b=>b.addEventListener('click',()=>{
+    const id=b.dataset.sk;
+    if(state.skills.has(id)) state.skills.delete(id); else state.skills.add(id);
+    save(); meter(); renderPath();
+  }));
+}
+
+function renderDiag(){
+  const box=$('#diagnostico');
+  const d=state.diag;
+  if(d){
+    const st=PATH.find(x=>x.n===d.level);
+    box.innerHTML=`<div class="diag">
+      <div class="diag-h"><h3>Tu punto de partida</h3>
+        <button class="simbtn" id="diag-again">Rehacer el test</button></div>
+      <div class="verdictbox">
+        <span class="big">Nivel ${d.level} &mdash; ${st.title}</span>
+        <p class="exp">${d.score}/${DIAG.length} correctas. ${d.level===6&&d.score===DIAG.length
+          ? 'No fallaste ninguna: la ruta te sirve como checklist de repaso más que como plan de estudio. Andá directo al Lab y a Criterio.'
+          : `Los niveles anteriores probablemente ya los tengas; el ${d.level} es el primero donde algo se te escapó. Está marcado abajo.`}</p>
+      </div>
+      <div class="diag-review">${DIAG.map((q,i)=>{
+        const ok=d.answers[i];
+        return `<div class="row"><span class="mk ${ok?'y':'n'}">N${q.lvl}</span>
+          <span>${ok?'':'<b>'+q.q.replace(/<[^>]+>/g,'')+'</b><br>'}${q.why}</span></div>`;
+      }).join('')}</div>
+    </div>`;
+    $('#diag-again').addEventListener('click',()=>{ state.diag=null; save(); diagStep=0; diagAns=[]; renderDiag(); renderPath(); });
+    return;
+  }
+  if(diagStep<0){
+    box.innerHTML=`<div class="diag"><div class="diag-h">
+      <h3>¿Por dónde empiezo?</h3></div>
+      <p class="note" style="max-width:62ch">Ocho preguntas, dos minutos. Te dicen cuál de los seis niveles es el primero que te conviene trabajar, en vez de leer los seis y adivinar.</p>
+      <div><button class="simbtn go" id="diag-start">Hacer el test de ubicación</button></div>
+    </div>`;
+    $('#diag-start').addEventListener('click',()=>{ diagStep=0; renderDiag(); });
+    return;
+  }
+  const q=DIAG[diagStep];
+  box.innerHTML=`<div class="diag">
+    <div class="diag-h"><h3>Test de ubicación</h3>
+      <span class="diag-prog">${DIAG.map((_,i)=>`<i class="${i<diagStep?'on':i===diagStep?'cur':''}"></i>`).join('')}</span></div>
+    <div class="diag-q">
+      <p class="qtext">${q.q}</p>
+      <div class="diag-opts">${q.opts.map((o,k)=>`<button type="button" data-k="${k}">${o.t}</button>`).join('')}</div>
+    </div>
+  </div>`;
+  $$('#diagnostico .diag-opts button').forEach(b=>b.addEventListener('click',()=>{
+    diagAns[diagStep]=q.opts[+b.dataset.k].ok;
+    diagStep++;
+    if(diagStep>=DIAG.length){
+      const wrong=DIAG.map((x,i)=>diagAns[i]?null:x.lvl).filter(x=>x!==null);
+      const level = wrong.length? Math.min(...wrong) : 6;
+      state.diag={level, score:diagAns.filter(Boolean).length, answers:diagAns.slice()};
+      save(); renderPath();
+    }
+    renderDiag();
+  }));
+}
+</script>
+<script>
+/* =====================================================================
+   Simuladores
+   ===================================================================== */
+function erf(x){
+  const s=x<0?-1:1; x=Math.abs(x);
+  const t=1/(1+0.3275911*x);
+  const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+  return s*y;
+}
+const phi = z => 0.5*(1+erf(z/Math.SQRT2));
+const gs = () => { let u=0,v=0; while(u===0)u=Math.random(); while(v===0)v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); };
+const binom = (n,p) => Math.max(0, Math.min(n, Math.round(n*p + Math.sqrt(n*p*(1-p))*gs())));
+const pct = (x,d=1) => (x*100).toFixed(d)+'%';
+
+function card(id,title,question,body){
+  return `<article class="sim" id="${id}"><div class="sim-h"><h3>${title}</h3><p class="q">${question}</p></div>${body}</article>`;
+}
+function slider(id,name,min,max,step,val,fmt){
+  return `<div class="ctrl"><div class="top"><label class="cname" for="${id}">${name}</label>
+    <span class="cval" id="${id}-v">${fmt(val)}</span></div>
+    <input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}"></div>`;
+}
+function cells(list){
+  return `<div class="readout">${list.map(c=>`<div class="cell"><span class="k">${c.k}</span>
+    <span class="v ${c.tone||''}">${c.v}</span>${c.s?`<span class="s">${c.s}</span>`:''}</div>`).join('')}</div>`;
+}
+
+/* ---------------- 1. A/B test y peeking ---------------- */
+const AB={tally:{runs:0, peek:0, end:0}};
+function simAB(){
+  return card('sim-ab','El test A/B que mirás todos los días',
+   'Poné el efecto real en 0% —&nbsp;las dos variantes idénticas&nbsp;— y corré el test varias veces. Contá cuántas veces habrías cantado victoria si mirabas el resultado cada mañana.',
+   `<div class="sim-b">
+      <div class="ctrls">
+        ${slider('ab-lift','Efecto real de B',0,8,0.5,0,v=>'+'+(+v).toFixed(1)+'%')}
+        ${slider('ab-n','Visitantes por día',200,3000,100,800,v=>(+v).toLocaleString('es-AR'))}
+        ${slider('ab-d','Días de test',14,45,1,30,v=>v+' días')}
+        <div class="simbtns">
+          <button class="simbtn go" id="ab-run">Correr el test</button>
+          <button class="simbtn" id="ab-reset">Reiniciar cuenta</button>
+        </div>
+      </div>
+      <div class="simout" id="ab-out"></div>
+    </div>`);
+}
+function runAB(){
+  const lift=+$('#ab-lift').value/100, nDay=+$('#ab-n').value, days=+$('#ab-d').value;
+  const base=0.05;
+  let cA=0,cB=0,nA=0,nB=0, firstHit=null, firstLift=null, series=[];
+  for(let d=1; d<=days; d++){
+    nA+=nDay; nB+=nDay;
+    cA+=binom(nDay, base); cB+=binom(nDay, base*(1+lift));
+    const pA=cA/nA, pB=cB/nB, pp=(cA+cB)/(nA+nB);
+    const se=Math.sqrt(pp*(1-pp)*(1/nA+1/nB));
+    const z=se>0?(pB-pA)/se:0;
+    const pv=2*(1-phi(Math.abs(z)));
+    series.push(pv);
+    if(pv<0.05 && pB>pA && firstHit===null){ firstHit=d; firstLift=pB/pA-1; }
+  }
+  const pvFinal=series[series.length-1], winEnd = pvFinal<0.05 && cB/nB>cA/nA;
+  AB.tally.runs++; if(firstHit!==null) AB.tally.peek++; if(winEnd) AB.tally.end++;
+  AB.last={lift,nDay,days,cA,cB,nA,nB,series,firstHit,firstLift,pvFinal,winEnd};
+  drawAB();
+}
+/* redibuja la última corrida: se usa también al cambiar de tema, sin volver a simular */
+function drawAB(){
+  if(!AB.last) return;
+  const {lift,nDay,days,cA,cB,nA,nB,series,firstHit,firstLift,pvFinal,winEnd}=AB.last;
+  const pA=cA/nA, pB=cB/nB, obs=pB/pA-1;
+
+  const W=560,H=150,m={t:10,r:12,b:20,l:34}, iw=W-m.l-m.r, ih=H-m.t-m.b;
+  const Y=p=>m.t+(1-Math.sqrt(Math.min(1,p)))*ih;
+  const X=i=>m.l+(series.length>1? i/(series.length-1)*iw : iw/2);
+  const rule=cssv('--rule'), ink3=cssv('--ink-3'), acc=cssv('--accent'), rust=cssv('--rust');
+  let grid='';
+  [1,0.5,0.2,0.05].forEach(t=>{
+    const y=Y(t).toFixed(1), sig=t===0.05;
+    grid+=`<line x1="${m.l}" y1="${y}" x2="${m.l+iw}" y2="${y}" stroke="${sig?rust:rule}" stroke-width="1" ${sig?'stroke-dasharray="4 3"':''}/>`
+      +`<text x="${m.l-6}" y="${(+y+3.5)}" text-anchor="end" fill="${sig?rust:ink3}" font-size="9.5" font-family="IBM Plex Mono, monospace">${String(t).replace('.',',')}</text>`;
+  });
+  const path=series.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p).toFixed(1)).join(' ');
+  const marks=series.map((p,i)=> p<0.05
+    ? `<circle cx="${X(i).toFixed(1)}" cy="${Y(p).toFixed(1)}" r="2.6" fill="${rust}"/>` : '').join('');
+
+  const veredicto = lift===0
+    ? (firstHit!==null
+       ? `<div class="verdictline hot"><b>Las dos variantes son idénticas</b> y aun así el p-valor cruzó 0,05 el <b>día ${firstHit}</b>, con un &laquo;efecto&raquo; observado de ${pct(firstLift)}. Si mirabas todos los días y parabas ahí, lanzabas un cambio que no hace nada.</div>`
+       : `<div class="verdictline">Con efecto real 0%, esta corrida nunca cruzó 0,05. Corré de nuevo unas cuantas veces: tarde o temprano una va a cruzar, y esa es la que te habrías creído.</div>`)
+    : (firstHit!==null
+       ? `<div class="verdictline">Efecto real ${pct(lift)}. El test lo detectó el <b>día ${firstHit}</b>, pero midiendo ${pct(firstLift)} — al parar en el primer día significativo, el efecto observado casi siempre <b>exagera</b> el real. Al cierre mide ${pct(obs)}.</div>`
+       : `<div class="verdictline hot">Efecto real ${pct(lift)} y el test <b>no lo detectó</b>: con ${nDay.toLocaleString('es-AR')} visitantes por día no hay potencia suficiente. Un test que no puede detectar el efecto que buscás es tiempo perdido.</div>`);
+
+  $('#ab-out').innerHTML = cells([
+    {k:'Conversión A', v:pct(pA,2), s:cA.toLocaleString('es-AR')+' de '+nA.toLocaleString('es-AR')},
+    {k:'Conversión B', v:pct(pB,2), s:cB.toLocaleString('es-AR')+' de '+nB.toLocaleString('es-AR')},
+    {k:'Efecto medido', v:(obs>=0?'+':'')+pct(obs), tone:obs>=0?'pos':'neg', s:'real: '+(lift?'+'+pct(lift):'0%')},
+    {k:'p-valor final', v:pvFinal<0.001?'<0,001':pvFinal.toFixed(3).replace('.',','), tone:winEnd?'pos':'', s:winEnd?'significativo':'no significativo'}
+  ]) + `
+    <div class="figure"><div class="figcap"><h4 style="font-size:14px">p-valor día a día</h4>
+      <p class="sub">Cada punto rojo es un día en que el test &laquo;daba significativo&raquo;. La línea punteada es 0,05.</p></div>
+      <div class="chartbox"><svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="p-valor a lo largo de los días del test">
+        ${grid}<path d="${path}" fill="none" stroke="${acc}" stroke-width="2" stroke-linejoin="round"/>${marks}
+        <text x="${m.l}" y="${H-5}" fill="${ink3}" font-size="9.5" font-family="IBM Plex Mono, monospace">día 1</text>
+        <text x="${m.l+iw}" y="${H-5}" text-anchor="end" fill="${ink3}" font-size="9.5" font-family="IBM Plex Mono, monospace">día ${days}</text>
+      </svg></div></div>
+    ${veredicto}
+    <div class="tally">
+      <span>corridas: <b>${AB.tally.runs}</b></span>
+      <span class="warn">&laquo;ganó&raquo; mirando todos los días: <b>${AB.tally.peek}</b> (${AB.tally.runs?pct(AB.tally.peek/AB.tally.runs,0):'0%'})</span>
+      <span>ganó mirando sólo al final: <b>${AB.tally.end}</b> (${AB.tally.runs?pct(AB.tally.end/AB.tally.runs,0):'0%'})</span>
+    </div>`;
+}
+
+/* ---------------- 2. media vs mediana ---------------- */
+const MM={base:null};
+function simMM(){
+  return card('sim-mm','La media que se va con un solo cliente',
+   'Quince tickets de un negocio normal. Movés el ticket más grande y mirás cuál de las dos medidas te sigue contando la verdad sobre el cliente típico.',
+   `<div class="sim-b">
+      <div class="ctrls">
+        ${slider('mm-out','Ticket más alto',120,3000,20,150,v=>'$'+(+v).toLocaleString('es-AR'))}
+        ${slider('mm-k','Cuántos clientes así',1,4,1,1,v=>v+(v==1?' cliente':' clientes'))}
+        <div class="simbtns"><button class="simbtn" id="mm-new">Otra muestra</button></div>
+      </div>
+      <div class="simout" id="mm-out-box"></div>
+    </div>`);
+}
+function mmSample(){ MM.base=Array.from({length:15},()=>Math.round(28+Math.random()*82)); }
+function runMM(){
+  if(!MM.base) mmSample();
+  const big=+$('#mm-out').value, k=+$('#mm-k').value;
+  const vals=MM.base.slice(0,15-k).concat(Array.from({length:k},(_,i)=>Math.round(big*(1-i*0.08))));
+  const sorted=vals.slice().sort((a,b)=>a-b);
+  const mean=vals.reduce((a,b)=>a+b,0)/vals.length;
+  const med=sorted[Math.floor(sorted.length/2)];
+  const meanNo=MM.base.reduce((a,b)=>a+b,0)/MM.base.length;
+
+  const W=560,H=118,m={t:30,r:16,b:16,l:16}, iw=W-m.l-m.r, cy=m.t+28;
+  const hi=Math.max(...vals)*1.05, X=v=>m.l+v/hi*iw;
+  const acc=cssv('--accent'), rust=cssv('--rust'), ink3=cssv('--ink-3'), rule=cssv('--rule-strong');
+  // jitter vertical: con un outlier grande los tickets normales se apilan en el margen izquierdo
+  const dots=sorted.map((v,i)=>{
+    const big_=v>=big*0.9, j=((i%5)-2)*7.5;
+    return `<circle cx="${X(v).toFixed(1)}" cy="${(cy+j).toFixed(1)}" r="4.2" fill="${big_?rust:acc}" opacity="${big_?'1':'.55'}"/>`;
+  }).join('');
+  const mk=(v,c,lab,dy)=>`<line x1="${X(v).toFixed(1)}" y1="${m.t-6}" x2="${X(v).toFixed(1)}" y2="${cy+30}" stroke="${c}" stroke-width="2"/>
+    <text x="${X(v).toFixed(1)}" y="${dy}" text-anchor="middle" fill="${c}" font-size="10.5" font-weight="600" font-family="IBM Plex Mono, monospace">${lab}</text>`;
+
+  $('#mm-out-box').innerHTML = cells([
+    {k:'Media', v:'$'+Math.round(mean).toLocaleString('es-AR'), tone:'neg', s:'se movió '+pct(mean/meanNo-1,0)},
+    {k:'Mediana', v:'$'+med.toLocaleString('es-AR'), tone:'pos', s:'el cliente del medio'},
+    {k:'Brecha', v:(mean/med).toFixed(2)+'×', s:'media sobre mediana'}
+  ]) + `
+    <div class="chartbox"><svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Distribución de tickets con media y mediana marcadas">
+      <line x1="${m.l}" y1="${cy+30}" x2="${m.l+iw}" y2="${cy+30}" stroke="${rule}" stroke-width="1"/>
+      ${dots}${mk(med,acc,'mediana $'+med.toLocaleString('es-AR'),cy+46)}${mk(mean,rust,'media $'+Math.round(mean).toLocaleString('es-AR'),m.t-13)}
+    </svg></div>
+    <div class="verdictline ${mean/med>1.35?'hot':''}">
+      ${mean/med>1.35
+        ? `La media dice <b>$${Math.round(mean).toLocaleString('es-AR')}</b> y la mediana dice <b>$${med.toLocaleString('es-AR')}</b>. Ningún cliente gasta la media: ${k===1?'un solo cliente la':'unos pocos clientes la'} arrastr${k===1?'a':'an'}. Si reportás &laquo;el ticket promedio es $${Math.round(mean).toLocaleString('es-AR')}&raquo;, estás describiendo a nadie.`
+        : `Sin outliers grandes, media y mediana casi coinciden y da igual cuál uses. Subí el ticket más alto y mirá cuál de las dos se mueve.`}
+    </div>
+    <p class="note">La media no está &laquo;mal&raquo;: para facturación total es la correcta, porque esos clientes existen y pagan. Está mal cuando la usás para describir al cliente típico.</p>`;
+}
+
+/* ---------------- 3. Simpson ---------------- */
+function simSimpson(){
+  return card('sim-simpson','La paradoja que da vuelta el resultado',
+   'B convierte mejor que A en escritorio <b>y</b> en celular. Movés qué proporción de cada rama cayó en celular y mirás qué le pasa al total.',
+   `<div class="sim-b">
+      <div class="ctrls">
+        ${slider('sp-a','Tráfico de A en celular',10,90,5,30,v=>v+'%')}
+        ${slider('sp-b','Tráfico de B en celular',10,90,5,30,v=>v+'%')}
+        <p class="note" style="font-size:12.5px">Tasas fijas: en escritorio A convierte 12% y B 14%. En celular A 4% y B 5%. <b>B gana siempre</b> dentro de cada segmento.</p>
+      </div>
+      <div class="simout" id="sp-out"></div>
+    </div>`);
+}
+function runSimpson(){
+  const mA=+$('#sp-a').value/100, mB=+$('#sp-b').value/100, N=10000;
+  const rates={desk:{A:0.12,B:0.14}, mob:{A:0.04,B:0.05}};
+  const nA={mob:N*mA, desk:N*(1-mA)}, nB={mob:N*mB, desk:N*(1-mB)};
+  const cA=nA.desk*rates.desk.A + nA.mob*rates.mob.A;
+  const cB=nB.desk*rates.desk.B + nB.mob*rates.mob.B;
+  const tA=cA/N, tB=cB/N, flip=tB<tA;
+  const row=(lab,a,b,na,nb)=>`<tr><td>${lab}</td><td class="num">${pct(a,1)}</td><td class="num">${pct(b,1)}</td>
+    <td style="color:${b>a?'var(--good)':'var(--rust)'}">${b>a?'B gana':'A gana'}</td>
+    <td class="num" style="color:var(--ink-3)">${Math.round(na).toLocaleString('es-AR')} / ${Math.round(nb).toLocaleString('es-AR')}</td></tr>`;
+  $('#sp-out').innerHTML = `
+    <div class="tablescroll" style="max-height:none"><table class="grid">
+      <thead><tr><th>segmento</th><th>A</th><th>B</th><th>resultado</th><th>visitas A / B</th></tr></thead>
+      <tbody>
+        ${row('Escritorio',rates.desk.A,rates.desk.B,nA.desk,nB.desk)}
+        ${row('Celular',rates.mob.A,rates.mob.B,nA.mob,nB.mob)}
+        <tr style="border-top:2px solid var(--rule-strong)"><td><b>TOTAL</b></td>
+          <td class="num"><b>${pct(tA,2)}</b></td><td class="num"><b>${pct(tB,2)}</b></td>
+          <td style="color:${flip?'var(--rust)':'var(--good)'}"><b>${flip?'A gana':'B gana'}</b></td>
+          <td class="num" style="color:var(--ink-3)">${N.toLocaleString('es-AR')} / ${N.toLocaleString('es-AR')}</td></tr>
+      </tbody></table></div>
+    <div class="verdictline ${flip?'hot':''}">
+      ${flip
+        ? `<b>Ahí está la paradoja.</b> B gana en escritorio y gana en celular, pero pierde en el total, porque a B le tocó mucho más celular (${$('#sp-b').value}% contra ${$('#sp-a').value}%) y el celular convierte peor para todos. El total no mide la variante: mide la mezcla.`
+        : `Con mezclas parecidas, el total coincide con los segmentos y todo cierra. Subí el tráfico de B en celular por encima del de A y mirá cuándo se da vuelta.`}
+    </div>
+    <p class="note">En un A/B real esta diferencia de mezcla no debería existir: si aparece, casi siempre es un bug en la asignación, y ese es el hallazgo antes que cualquier lectura de conversión.</p>`;
+}
+
+/* ---------------- 4. correlación ---------------- */
+const CO={z1:null,z3:null};
+function simCorr(){
+  return card('sim-corr','Qué se ve, en realidad, con r = 0,5',
+   'Casi todos sobreestiman lo que significa un coeficiente de correlación. Movelo y calibrá el ojo con la nube que le corresponde.',
+   `<div class="sim-b">
+      <div class="ctrls">
+        ${slider('co-r','Correlación (r)',-100,100,5,70,v=>(v/100).toFixed(2).replace('.',','))}
+        <div class="simbtns"><button class="simbtn" id="co-new">Otra nube</button></div>
+        <p class="note" style="font-size:12.5px">R² es la parte de la variación de Y que queda explicada por X. Es <em>r al cuadrado</em>: por eso cae tan rápido.</p>
+      </div>
+      <div class="simout" id="co-out"></div>
+    </div>`);
+}
+function coSample(){ CO.z1=Array.from({length:150},gs); CO.z3=Array.from({length:150},gs); }
+function runCorr(){
+  if(!CO.z1) coSample();
+  const r=+$('#co-r').value/100;
+  const k=Math.sqrt(Math.max(0,1-r*r));
+  const pts=CO.z1.map((z,i)=>[z, r*z + k*CO.z3[i]]);
+  const mx=pts.reduce((a,p)=>a+p[0],0)/pts.length, my=pts.reduce((a,p)=>a+p[1],0)/pts.length;
+  let sxy=0,sxx=0,syy=0;
+  pts.forEach(([x,y])=>{sxy+=(x-mx)*(y-my); sxx+=(x-mx)**2; syy+=(y-my)**2});
+  const rs=sxy/Math.sqrt(sxx*syy);
+  const W=560,H=230,m=26, iw=W-m*2, ih=H-m*2;
+  const lim=3.2, X=v=>m+(v+lim)/(2*lim)*iw, Y=v=>m+(1-(v+lim)/(2*lim))*ih;
+  const acc=cssv('--accent'), rule=cssv('--rule'), ink3=cssv('--ink-3');
+  const dots=pts.map(([x,y])=>`<circle cx="${X(x).toFixed(1)}" cy="${Y(y).toFixed(1)}" r="3.2" fill="${acc}" opacity=".55"/>`).join('');
+  const b=rs*Math.sqrt(syy/sxx);
+  const fit=`<line x1="${X(-lim).toFixed(1)}" y1="${Y(my+b*(-lim-mx)).toFixed(1)}" x2="${X(lim).toFixed(1)}" y2="${Y(my+b*(lim-mx)).toFixed(1)}" stroke="${cssv('--rust')}" stroke-width="2" opacity=".85"/>`;
+  const lectura = Math.abs(rs)<0.25 ? 'Prácticamente una nube redonda: no hay relación que puedas usar para predecir nada.'
+    : Math.abs(rs)<0.55 ? 'Se intuye una inclinación, pero la dispersión sigue mandando. Con este r, saber X apenas te ayuda a adivinar Y.'
+    : Math.abs(rs)<0.85 ? 'Relación clara y todavía mucho ruido. Sirve para una tendencia agregada, no para predecir un caso individual.'
+    : 'Relación muy fuerte. En datos de negocio, un r así casi siempre significa que las dos variables miden lo mismo dos veces.';
+  $('#co-out').innerHTML = cells([
+    {k:'r', v:rs.toFixed(2).replace('.',','), s:'correlación'},
+    {k:'R²', v:(rs*rs).toFixed(2).replace('.',','), s:pct(rs*rs,0)+' de la variación'},
+    {k:'Sin explicar', v:pct(1-rs*rs,0), tone:'neg', s:'el resto es otra cosa'}
+  ]) + `
+    <div class="chartbox"><svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Nube de puntos con la correlación elegida">
+      <line x1="${m}" y1="${H-m}" x2="${W-m}" y2="${H-m}" stroke="${rule}" stroke-width="1"/>
+      <line x1="${m}" y1="${m}" x2="${m}" y2="${H-m}" stroke="${rule}" stroke-width="1"/>
+      ${dots}${fit}
+      <text x="${W-m}" y="${H-9}" text-anchor="end" fill="${ink3}" font-size="10" font-family="IBM Plex Mono, monospace">X</text>
+      <text x="${m-8}" y="${m+4}" text-anchor="end" fill="${ink3}" font-size="10" font-family="IBM Plex Mono, monospace">Y</text>
+    </svg></div>
+    <div class="verdictline">${lectura} ${Math.abs(rs)>0.15?`Y esto sigue sin decir nada sobre <b>causa</b>: la misma nube sale si X causa Y, si Y causa X, o si un tercer factor causa las dos.`:''}</div>`;
+}
+</script>
+<script>
+/* ---------------- 5. visualizador de JOINs ---------------- */
+const JC=[[1,'Ana','AR',5000],[2,'Bruno','BR',3000],[3,'Carla','AR',8000],[4,'Diego','MX',4000],[5,'Elena','CL',2000]];
+const JP=[[101,1,120],[102,1,80],[103,2,45],[104,4,200],[105,4,60],[106,9,310]];
+const JOINS={
+  INNER:{sql:'SELECT * FROM clientes c\nJOIN pedidos p ON p.cliente_id = c.id;',
+    d:'Sólo las filas que matchean de los dos lados. Los clientes sin pedidos y los pedidos huérfanos desaparecen.'},
+  LEFT:{sql:'SELECT * FROM clientes c\nLEFT JOIN pedidos p ON p.cliente_id = c.id;',
+    d:'Todos los clientes, tengan pedidos o no. Los que no tienen quedan con <code>NULL</code> del lado derecho.'},
+  RIGHT:{sql:'SELECT * FROM clientes c\nRIGHT JOIN pedidos p ON p.cliente_id = c.id;',
+    d:'Todos los pedidos, incluso el que apunta a un cliente que no existe. Ese queda con <code>NULL</code> del lado izquierdo.'},
+  FULL:{sql:'SELECT * FROM clientes c\nFULL OUTER JOIN pedidos p ON p.cliente_id = c.id;',
+    d:'Todo de los dos lados. Sirve para auditar: te muestra de una los huérfanos de cada lado.'},
+  ANTI:{sql:'SELECT c.* FROM clientes c\nLEFT JOIN pedidos p ON p.cliente_id = c.id\nWHERE p.pedido_id IS NULL;',
+    d:'El anti-join: los clientes que <em>no</em> tienen ningún pedido. Es un <code>LEFT JOIN</code> filtrado por <code>NULL</code>.'}
+};
+let jkind='INNER';
+function simJoin(){
+  return card('sim-join','Qué le pasa a tus filas en cada JOIN',
+   'Cinco clientes, seis pedidos. Uno de los pedidos apunta a un cliente que no existe, y dos clientes tienen dos pedidos cada uno. Eleg&iacute; el join y mir&aacute; qui&eacute;n sobrevive, qui&eacute;n queda en <code>NULL</code> y qui&eacute;n se duplica.',
+   `<div class="sim-b" style="grid-template-columns:1fr">
+      <div class="simout">
+        <div class="joinpick" id="jpick">${Object.keys(JOINS).map(k=>
+          `<button type="button" data-j="${k}" aria-pressed="${k===jkind}">${k==='ANTI'?'ANTI (sin pedidos)':k+' JOIN'}</button>`).join('')}</div>
+        <div id="jout"></div>
+      </div>
+    </div>`);
+}
+function runJoin(){
+  const k=jkind;
+  const rows=[]; const usedC=new Set(), usedP=new Set();
+  if(k==='ANTI'){
+    JC.forEach(c=>{ if(!JP.some(p=>p[1]===c[0])) { rows.push([c,null]); usedC.add(c[0]); } });
+  } else {
+    JC.forEach(c=>{
+      const ms=JP.filter(p=>p[1]===c[0]);
+      if(ms.length){ ms.forEach(p=>{rows.push([c,p]); usedC.add(c[0]); usedP.add(p[0]);}); }
+      else if(k==='LEFT'||k==='FULL'){ rows.push([c,null]); usedC.add(c[0]); }
+    });
+    if(k==='RIGHT'||k==='FULL'){
+      JP.forEach(p=>{ if(!JC.some(c=>c[0]===p[1])) rows.push([null,p]); });
+    }
+  }
+  const cCount={}; rows.forEach(([c])=>{ if(c) cCount[c[0]]=(cCount[c[0]]||0)+1; });
+  const dupNames=Object.keys(cCount).filter(id=>cCount[id]>1).map(id=>JC.find(c=>c[0]==id)[1]);
+
+  const tblC=`<table class="mini"><caption>clientes &middot; ${JC.length} filas</caption>
+    <thead><tr><th>id</th><th>nombre</th><th>cr&eacute;dito</th></tr></thead><tbody>${
+    JC.map(c=>{const on=usedC.has(c[0]);
+      return `<tr class="${on?(cCount[c[0]]>1?'dup':'hit'):'miss'}"><td>${c[0]}</td><td>${c[1]}</td><td>${c[3].toLocaleString('es-AR')}</td></tr>`;
+    }).join('')}</tbody></table>`;
+  const tblP=`<table class="mini"><caption>pedidos &middot; ${JP.length} filas</caption>
+    <thead><tr><th>pedido_id</th><th>cliente_id</th><th>monto</th></tr></thead><tbody>${
+    JP.map(p=>{const on=k==='ANTI'?false:usedP.has(p[0])||((k==='RIGHT'||k==='FULL')&&!JC.some(c=>c[0]===p[1]));
+      const orphan=!JC.some(c=>c[0]===p[1]);
+      return `<tr class="${on?'hit':'miss'}"><td>${p[0]}</td><td${orphan?' style="color:var(--rust)"':''}>${p[1]}</td><td>${p[2]}</td></tr>`;
+    }).join('')}</tbody></table>`;
+  const tblR=`<table class="mini"><caption>resultado &middot; ${rows.length} filas</caption>
+    <thead><tr><th>nombre</th><th>cr&eacute;dito</th><th>pedido_id</th><th>monto</th></tr></thead><tbody>${
+    rows.length? rows.map(([c,p])=>{
+      const dup=c&&cCount[c[0]]>1;
+      return `<tr class="${dup?'dup':''}">
+        <td class="${c?'':'nul'}">${c?c[1]:'NULL'}</td><td class="${c?'':'nul'}">${c?c[3].toLocaleString('es-AR'):'NULL'}</td>
+        <td class="${p?'':'nul'}">${p?p[0]:'NULL'}</td><td class="${p?'':'nul'}">${p?p[2]:'NULL'}</td></tr>`;
+    }).join('') : '<tr><td colspan="4" class="nul">sin filas</td></tr>'}</tbody></table>`;
+
+  // sumar un dato del cliente sobre el resultado es exactamente donde muerde el fan-out
+  const sumCred=rows.reduce((a,[c])=>a+(c?c[3]:0),0);
+  const realCred=[...new Set(rows.filter(([c])=>c).map(([c])=>c[0]))]
+    .reduce((a,id)=>a+JC.find(c=>c[0]===id)[3],0);
+  $('#jout').innerHTML = `
+    <p class="ex-teach" style="margin-top:2px;max-width:74ch">${JOINS[k].d}</p>
+    <pre class="sql" style="margin-top:4px">${esc(JOINS[k].sql)}</pre>
+    <div class="jgrid" style="margin-top:14px">${tblC}${tblP}${tblR}</div>
+    <div class="jkey" style="margin-top:10px">
+      <span><i style="background:var(--accent-soft); border-color:var(--accent)"></i>entra al resultado</span>
+      <span><i style="background:var(--rust-soft); border-color:var(--rust)"></i>se duplica (fan-out)</span>
+      <span><i style="background:var(--surface-2); opacity:.5"></i>queda afuera</span>
+    </div>
+    ${cells([
+      {k:'Filas de entrada', v:JC.length+' × '+JP.length, s:'clientes × pedidos'},
+      {k:'Filas de salida', v:String(rows.length), tone:rows.length>JC.length?'neg':'', s:rows.length>JC.length?'más que clientes':'una por cliente o menos'},
+      {k:'Suma de créditos', v:'$'+sumCred.toLocaleString('es-AR'), tone:sumCred>realCred?'neg':'',
+       s:sumCred>realCred?'real: $'+realCred.toLocaleString('es-AR')+' — inflado '+pct(sumCred/realCred-1,0):'correcto'}
+    ])}
+    ${dupNames.length
+      ? `<div class="verdictline hot"><b>Fan-out.</b> ${dupNames.join(' y ')} aparece${dupNames.length>1?'n':''} más de una vez porque tiene${dupNames.length>1?'n':''} varios pedidos. Mirá el tercer recuadro: sumar el límite de crédito sobre este resultado da <b>$${sumCred.toLocaleString('es-AR')}</b> cuando el real es <b>$${realCred.toLocaleString('es-AR')}</b> — ${pct(sumCred/realCred-1,0)} de más. Es el error de SQL más caro que existe, porque el resultado parece perfectamente razonable.</div>`
+      : `<div class="verdictline">Sin duplicados: cada cliente aparece a lo sumo una vez. Probá <b>INNER</b> o <b>LEFT</b> para ver el fan-out.</div>`}`;
+}
+
+/* ---------------- montaje ---------------- */
+function renderSims(){
+  $('#sims').innerHTML = simAB()+simJoin()+simSimpson()+simMM()+simCorr();
+
+  const live=(id,fmt,fn)=>{ const el=$(id); el.addEventListener('input',()=>{ $(id+'-v').textContent=fmt(el.value); fn(); }); };
+
+  live('#ab-lift',v=>'+'+(+v).toFixed(1)+'%',()=>{});
+  live('#ab-n',v=>(+v).toLocaleString('es-AR'),()=>{});
+  live('#ab-d',v=>v+' días',()=>{});
+  $('#ab-run').addEventListener('click',runAB);
+  $('#ab-reset').addEventListener('click',()=>{ AB.tally={runs:0,peek:0,end:0}; drawAB(); });
+
+  $$('#jpick button').forEach(b=>b.addEventListener('click',()=>{
+    jkind=b.dataset.j;
+    $$('#jpick button').forEach(x=>x.setAttribute('aria-pressed', x===b?'true':'false'));
+    runJoin();
+  }));
+
+  live('#sp-a',v=>v+'%',runSimpson);
+  live('#sp-b',v=>v+'%',runSimpson);
+
+  live('#mm-out',v=>'$'+(+v).toLocaleString('es-AR'),runMM);
+  live('#mm-k',v=>v+(v==1?' cliente':' clientes'),runMM);
+  $('#mm-new').addEventListener('click',()=>{ mmSample(); runMM(); });
+
+  live('#co-r',v=>(v/100).toFixed(2).replace('.',','),runCorr);
+  $('#co-new').addEventListener('click',()=>{ coSample(); runCorr(); });
+
+  runAB(); runJoin(); runSimpson(); runMM(); runCorr();
+}
+
+renderPath(); renderDiag(); renderSims();
+// los simuladores dibujan con colores del tema: al cambiarlo, se redibujan
+$('#theme-toggle').addEventListener('click',()=>{ drawAB(); runSimpson(); runMM(); runCorr(); runJoin(); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{ drawAB(); runMM(); runCorr(); });
 </script>
