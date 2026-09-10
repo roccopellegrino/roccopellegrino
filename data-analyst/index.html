@@ -1905,7 +1905,7 @@ function cells(list){
 const AB={tally:{runs:0, peek:0, end:0}};
 function simAB(){
   return card('sim-ab','El test A/B que mirás todos los días',
-   'Poné el efecto real en 0% —&nbsp;las dos variantes idénticas&nbsp;— y corré el test varias veces. Contá cuántas veces habrías cantado victoria si mirabas el resultado cada mañana.',
+   'Poné el efecto real en 0% —&nbsp;las dos variantes idénticas, no hay nada que encontrar&nbsp;— y corré el test varias veces. El contador de abajo compara cuántas veces el test dio significativo si lo mirabas cada mañana contra mirarlo sólo al cierre.',
    `<div class="sim-b">
       <div class="ctrls">
         ${slider('ab-lift','Efecto real de B',0,8,0.5,0,v=>'+'+(+v).toFixed(1)+'%')}
@@ -1922,7 +1922,7 @@ function simAB(){
 function runAB(){
   const lift=+$('#ab-lift').value/100, nDay=+$('#ab-n').value, days=+$('#ab-d').value;
   const base=0.05;
-  let cA=0,cB=0,nA=0,nB=0, firstHit=null, firstLift=null, series=[];
+  let cA=0,cB=0,nA=0,nB=0, firstHit=null, firstLift=null, firstPA=null, firstPB=null, series=[];
   for(let d=1; d<=days; d++){
     nA+=nDay; nB+=nDay;
     cA+=binom(nDay, base); cB+=binom(nDay, base*(1+lift));
@@ -1931,17 +1931,17 @@ function runAB(){
     const z=se>0?(pB-pA)/se:0;
     const pv=2*(1-phi(Math.abs(z)));
     series.push(pv);
-    if(pv<0.05 && pB>pA && firstHit===null){ firstHit=d; firstLift=pB/pA-1; }
+    if(pv<0.05 && firstHit===null){ firstHit=d; firstLift=pB/pA-1; firstPA=pA; firstPB=pB; }
   }
-  const pvFinal=series[series.length-1], winEnd = pvFinal<0.05 && cB/nB>cA/nA;
+  const pvFinal=series[series.length-1], winEnd = pvFinal<0.05;
   AB.tally.runs++; if(firstHit!==null) AB.tally.peek++; if(winEnd) AB.tally.end++;
-  AB.last={lift,nDay,days,cA,cB,nA,nB,series,firstHit,firstLift,pvFinal,winEnd};
+  AB.last={lift,nDay,days,cA,cB,nA,nB,series,firstHit,firstLift,firstPA,firstPB,pvFinal,winEnd};
   drawAB();
 }
 /* redibuja la última corrida: se usa también al cambiar de tema, sin volver a simular */
 function drawAB(){
   if(!AB.last) return;
-  const {lift,nDay,days,cA,cB,nA,nB,series,firstHit,firstLift,pvFinal,winEnd}=AB.last;
+  const {lift,nDay,days,cA,cB,nA,nB,series,firstHit,firstLift,firstPA,firstPB,pvFinal,winEnd}=AB.last;
   const pA=cA/nA, pB=cB/nB, obs=pB/pA-1;
 
   const W=560,H=150,m={t:10,r:12,b:20,l:34}, iw=W-m.l-m.r, ih=H-m.t-m.b;
@@ -1958,12 +1958,15 @@ function drawAB(){
   const marks=series.map((p,i)=> p<0.05
     ? `<circle cx="${X(i).toFixed(1)}" cy="${Y(p).toFixed(1)}" r="2.6" fill="${rust}"/>` : '').join('');
 
+  const dir = firstLift>=0 ? 'B' : 'A';
   const veredicto = lift===0
     ? (firstHit!==null
-       ? `<div class="verdictline hot"><b>Las dos variantes son idénticas</b> y aun así el p-valor cruzó 0,05 el <b>día ${firstHit}</b>, con un &laquo;efecto&raquo; observado de ${pct(firstLift)}. Si mirabas todos los días y parabas ahí, lanzabas un cambio que no hace nada.</div>`
+       ? `<div class="verdictline hot"><b>Las dos variantes son idénticas</b> y aun así el p-valor cruzó 0,05 el <b>día ${firstHit}</b>, cuando B iba ${pct(firstPB,2)} contra ${pct(firstPA,2)} de A —&nbsp;${pct(Math.abs(firstLift))} de diferencia relativa a favor de <b>${dir}</b>. Si mirabas todos los días y parabas ahí, tomabas una decisión sobre un efecto que no existe.${firstHit<=5?' Y fijate que fue en los primeros días: con poca muestra acumulada, la diferencia relativa se dispara sola.':''}</div>`
        : `<div class="verdictline">Con efecto real 0%, esta corrida nunca cruzó 0,05. Corré de nuevo unas cuantas veces: tarde o temprano una va a cruzar, y esa es la que te habrías creído.</div>`)
-    : (firstHit!==null
-       ? `<div class="verdictline">Efecto real ${pct(lift)}. El test lo detectó el <b>día ${firstHit}</b>, pero midiendo ${pct(firstLift)} — al parar en el primer día significativo, el efecto observado casi siempre <b>exagera</b> el real. Al cierre mide ${pct(obs)}.</div>`
+    : (firstHit!==null && firstLift>0
+       ? `<div class="verdictline">Efecto real ${pct(lift)}. El test lo detectó el <b>día ${firstHit}</b>, pero midiendo ${pct(firstLift)} (${pct(firstPB,2)} contra ${pct(firstPA,2)}) — al parar en el primer día significativo, el efecto observado casi siempre <b>exagera</b> el real. Al cierre mide ${pct(obs)}.</div>`
+       : firstHit!==null
+       ? `<div class="verdictline hot">Efecto real ${pct(lift)} a favor de B, y el <b>día ${firstHit}</b> el test dio significativo <b>a favor de A</b>. Parar ahí no sólo te hacía errar la magnitud: te hacía errar el signo.</div>`
        : `<div class="verdictline hot">Efecto real ${pct(lift)} y el test <b>no lo detectó</b>: con ${nDay.toLocaleString('es-AR')} visitantes por día no hay potencia suficiente. Un test que no puede detectar el efecto que buscás es tiempo perdido.</div>`);
 
   $('#ab-out').innerHTML = cells([
@@ -1982,8 +1985,8 @@ function drawAB(){
     ${veredicto}
     <div class="tally">
       <span>corridas: <b>${AB.tally.runs}</b></span>
-      <span class="warn">&laquo;ganó&raquo; mirando todos los días: <b>${AB.tally.peek}</b> (${AB.tally.runs?pct(AB.tally.peek/AB.tally.runs,0):'0%'})</span>
-      <span>ganó mirando sólo al final: <b>${AB.tally.end}</b> (${AB.tally.runs?pct(AB.tally.end/AB.tally.runs,0):'0%'})</span>
+      <span class="warn">dio significativo mirando todos los días: <b>${AB.tally.peek}</b> (${AB.tally.runs?pct(AB.tally.peek/AB.tally.runs,0):'0%'})</span>
+      <span>dio significativo sólo al cierre: <b>${AB.tally.end}</b> (${AB.tally.runs?pct(AB.tally.end/AB.tally.runs,0):'0%'})</span>
     </div>`;
 }
 
