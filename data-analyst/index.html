@@ -1,0 +1,1659 @@
+<meta charset="utf-8">
+<title>Query &amp; Criterio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400&display=swap">
+<style>
+:root{
+  --ground:#EEF1EC; --surface:#FBFCFA; --surface-2:#F4F7F2;
+  --ink:#14201C; --ink-2:#55665F; --ink-3:#7C8D86;
+  --rule:#D5DCD5; --rule-strong:#B9C4BC;
+  --accent:#067A57; --accent-soft:#E2EFE9;
+  --rust:#C2410C; --rust-soft:#F7E7DD;
+  --blue:#2563EB;
+  --good:#067A57; --warn:#9A5B08; --bad:#A33A2A;
+  --shadow:0 1px 2px rgba(20,32,28,.06), 0 8px 24px -18px rgba(20,32,28,.5);
+  --f-display:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Newsreader",Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#101613; --surface:#18211E; --surface-2:#1E2926;
+    --ink:#E3EBE6; --ink-2:#93A69D; --ink-3:#74867E;
+    --rule:#2A3733; --rule-strong:#3A4A45;
+    --accent:#12A87A; --accent-soft:#12332A;
+    --rust:#DD6B20; --rust-soft:#3A2418;
+    --blue:#4C8DE0;
+    --good:#12A87A; --warn:#D19A3E; --bad:#E0705C;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -20px #000;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#101613; --surface:#18211E; --surface-2:#1E2926;
+  --ink:#E3EBE6; --ink-2:#93A69D; --ink-3:#74867E;
+  --rule:#2A3733; --rule-strong:#3A4A45;
+  --accent:#12A87A; --accent-soft:#12332A;
+  --rust:#DD6B20; --rust-soft:#3A2418;
+  --blue:#4C8DE0;
+  --good:#12A87A; --warn:#D19A3E; --bad:#E0705C;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -20px #000;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--f-body); font-size:17px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4,.ui{font-family:var(--f-display); text-wrap:balance; letter-spacing:-.011em}
+h1,h2,h3,h4{margin:0; font-weight:700; line-height:1.15}
+p{margin:0}
+a{color:var(--accent)}
+code,kbd,.mono{font-family:var(--f-mono); font-variant-ligatures:none}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:3px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important; transition-duration:.01ms!important}}
+
+/* ---------- shell ---------- */
+.shell{max-width:1220px; margin:0 auto; padding-inline:20px; padding-block:0 72px}
+.masthead{display:flex; align-items:flex-end; justify-content:space-between; gap:20px;
+  flex-wrap:wrap; padding-block:26px 18px; border-bottom:1px solid var(--rule)}
+.brand{display:flex; flex-direction:column; gap:5px}
+.brand h1{font-size:clamp(28px,4.4vw,40px); font-weight:800; letter-spacing:-.028em}
+.brand .amp{color:var(--accent)}
+.tagline{font-size:15px; color:var(--ink-2); max-width:56ch; line-height:1.45}
+.mast-side{display:flex; align-items:center; gap:10px}
+.themebtn{font-family:var(--f-display); font-size:12px; font-weight:600; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--ink-2); background:var(--surface);
+  border:1px solid var(--rule); border-radius:999px; padding:7px 14px; cursor:pointer}
+.themebtn:hover{color:var(--ink); border-color:var(--rule-strong)}
+
+.layout{display:grid; grid-template-columns:206px minmax(0,1fr); gap:34px; margin-top:26px; align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:1fr; gap:20px}}
+
+/* ---------- rail ---------- */
+.rail{position:sticky; top:18px; display:flex; flex-direction:column; gap:22px}
+@media (max-width:900px){
+  .rail{position:sticky; top:0; z-index:20; background:var(--ground); gap:12px;
+    padding-block:10px; border-bottom:1px solid var(--rule); margin-inline:-20px; padding-inline:20px}
+}
+.navlist{display:flex; flex-direction:column; gap:2px}
+@media (max-width:900px){.navlist{flex-direction:row; overflow-x:auto; scrollbar-width:thin; gap:6px}}
+.navlist button{
+  display:flex; align-items:baseline; gap:9px; width:100%; text-align:left; cursor:pointer;
+  font-family:var(--f-display); font-size:14.5px; font-weight:600; color:var(--ink-2);
+  background:none; border:0; border-left:2px solid transparent; padding:7px 10px; border-radius:0 5px 5px 0;
+}
+.navlist button .n{font-family:var(--f-mono); font-size:11px; color:var(--ink-3); font-weight:500}
+.navlist button:hover{color:var(--ink); background:var(--surface-2)}
+.navlist button[aria-current="true"]{color:var(--accent); border-left-color:var(--accent); background:var(--surface-2)}
+@media (max-width:900px){
+  .navlist button{width:auto; white-space:nowrap; border-left:0; border-bottom:2px solid transparent; border-radius:5px 5px 0 0}
+  .navlist button[aria-current="true"]{border-left:0; border-bottom-color:var(--accent)}
+  .navlist button .n{display:none}
+}
+.railbox{border-top:1px solid var(--rule); padding-top:16px; display:flex; flex-direction:column; gap:9px}
+@media (max-width:900px){.railbox{display:none}}
+.railbox .lbl{font-family:var(--f-display); font-size:10.5px; font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-3)}
+.meter{height:5px; background:var(--rule); border-radius:99px; overflow:hidden}
+.meter i{display:block; height:100%; background:var(--accent); border-radius:99px; transition:width .3s ease}
+.railbox .num{font-family:var(--f-mono); font-size:12.5px; color:var(--ink-2); font-variant-numeric:tabular-nums}
+.railbox .reset{font-family:var(--f-display); font-size:11.5px; color:var(--ink-3); background:none;
+  border:0; padding:0; text-align:left; cursor:pointer; text-decoration:underline; text-underline-offset:2px}
+.railbox .reset:hover{color:var(--rust)}
+
+/* ---------- generic blocks ---------- */
+.view{display:flex; flex-direction:column; gap:30px; min-width:0}
+.view[hidden]{display:none}
+.lede{font-size:19px; line-height:1.55; max-width:64ch; color:var(--ink)}
+.lede em{color:var(--accent); font-style:italic}
+.eyebrow{font-family:var(--f-display); font-size:11px; font-weight:700; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink-3)}
+.sec-h{display:flex; flex-direction:column; gap:7px}
+.sec-h h2{font-size:clamp(21px,2.7vw,27px); letter-spacing:-.02em}
+.prose{max-width:66ch; display:flex; flex-direction:column; gap:13px; color:var(--ink)}
+.prose strong{font-weight:600; color:var(--ink)}
+.note{font-size:14.5px; color:var(--ink-2); line-height:1.5}
+hr.rule{border:0; border-top:1px solid var(--rule); margin:0}
+</style>
+<style>
+/* ---------- ruta (roadmap) ---------- */
+.track{display:flex; flex-direction:column}
+.stage{display:grid; grid-template-columns:52px minmax(0,1fr); gap:18px; padding-block:22px;
+  border-top:1px solid var(--rule)}
+.stage:first-child{border-top:0; padding-top:4px}
+@media (max-width:560px){.stage{grid-template-columns:1fr; gap:10px}}
+.stage-mark{display:flex; flex-direction:column; align-items:flex-start; gap:5px}
+.stage-mark .lvl{font-family:var(--f-mono); font-size:23px; font-weight:600; color:var(--accent);
+  line-height:1; font-variant-numeric:tabular-nums}
+.stage-mark .wks{font-family:var(--f-mono); font-size:10.5px; color:var(--ink-3); letter-spacing:.02em}
+.stage-body{display:flex; flex-direction:column; gap:11px; min-width:0}
+.stage-body h3{font-size:19px}
+.stage-body .what{font-size:16px; color:var(--ink-2); line-height:1.5; max-width:62ch}
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{font-family:var(--f-mono); font-size:11.5px; padding:3px 8px; border-radius:4px;
+  background:var(--surface-2); border:1px solid var(--rule); color:var(--ink-2)}
+.done-when{border-left:2px solid var(--accent); padding:2px 0 2px 13px; display:flex; flex-direction:column; gap:5px}
+.done-when .lbl{font-family:var(--f-display); font-size:10.5px; font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--accent)}
+.done-when p{font-size:15.5px; color:var(--ink); line-height:1.5; max-width:60ch}
+.trap{font-size:14.5px; color:var(--ink-2); line-height:1.5; max-width:62ch}
+.trap b{font-family:var(--f-display); font-size:11px; font-weight:700; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--rust); margin-right:7px}
+
+/* ---------- lab ---------- */
+.labgrid{display:grid; grid-template-columns:minmax(0,1fr) 236px; gap:22px; align-items:start}
+@media (max-width:1040px){.labgrid{grid-template-columns:1fr}}
+.panel{background:var(--surface); border:1px solid var(--rule); border-radius:9px; box-shadow:var(--shadow)}
+.panel-h{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  padding:13px 16px; border-bottom:1px solid var(--rule)}
+.panel-h h3{font-size:16.5px}
+.panel-b{padding:16px}
+
+.qbar{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.dbtabs{display:inline-flex; background:var(--surface-2); border:1px solid var(--rule); border-radius:7px; padding:2px}
+.dbtabs button{font-family:var(--f-display); font-size:12.5px; font-weight:600; color:var(--ink-2);
+  background:none; border:0; border-radius:5px; padding:6px 11px; cursor:pointer}
+.dbtabs button[aria-pressed="true"]{background:var(--surface); color:var(--ink); box-shadow:var(--shadow)}
+.exnav{display:flex; align-items:center; gap:5px; margin-left:auto}
+.exnav button{font-family:var(--f-mono); font-size:12px; color:var(--ink-2); background:var(--surface);
+  border:1px solid var(--rule); border-radius:6px; padding:5px 10px; cursor:pointer}
+.exnav button:hover:not(:disabled){color:var(--ink); border-color:var(--rule-strong)}
+.exnav button:disabled{opacity:.4; cursor:default}
+.exnav .pos{font-family:var(--f-mono); font-size:12px; color:var(--ink-3); font-variant-numeric:tabular-nums; padding-inline:3px}
+
+.exlist{display:flex; flex-wrap:wrap; gap:5px}
+.exlist button{position:relative; width:29px; height:29px; border-radius:6px; cursor:pointer;
+  font-family:var(--f-mono); font-size:12px; font-variant-numeric:tabular-nums;
+  background:var(--surface); border:1px solid var(--rule); color:var(--ink-2)}
+.exlist button:hover{border-color:var(--rule-strong); color:var(--ink)}
+.exlist button[aria-current="true"]{border-color:var(--accent); color:var(--accent); font-weight:600}
+.exlist button.solved{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+
+.ex-head{display:flex; flex-direction:column; gap:9px}
+.ex-meta{display:flex; align-items:center; gap:9px; flex-wrap:wrap}
+.tag{font-family:var(--f-mono); font-size:10.5px; letter-spacing:.04em; text-transform:uppercase;
+  padding:3px 7px; border-radius:4px; background:var(--surface-2); border:1px solid var(--rule); color:var(--ink-3)}
+.tag.lvl{background:var(--accent-soft); border-color:transparent; color:var(--accent)}
+.ex-head h3{font-size:18.5px}
+.ex-ask{font-size:16.5px; line-height:1.55; max-width:64ch}
+.ex-teach{font-size:14.5px; color:var(--ink-2); line-height:1.5; max-width:64ch}
+.ex-teach b{font-family:var(--f-display); font-size:11px; font-weight:700; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--ink-3); margin-right:6px}
+
+.editor{position:relative; margin-top:14px}
+.editor textarea{
+  display:block; width:100%; min-height:132px; resize:vertical;
+  font-family:var(--f-mono); font-size:13.5px; line-height:1.6; tab-size:2;
+  color:var(--ink); background:var(--surface-2); border:1px solid var(--rule-strong);
+  border-radius:8px; padding:13px 14px 13px 14px;
+}
+.editor textarea::placeholder{color:var(--ink-3)}
+.runbar{display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-top:11px}
+.btn{font-family:var(--f-display); font-size:13.5px; font-weight:600; cursor:pointer;
+  border-radius:7px; padding:9px 15px; border:1px solid transparent}
+.btn-primary{background:var(--accent); color:#fff}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-primary:disabled{opacity:.5; cursor:default; filter:none}
+.btn-ghost{background:var(--surface); border-color:var(--rule); color:var(--ink-2)}
+.btn-ghost:hover{color:var(--ink); border-color:var(--rule-strong)}
+.runhint{font-family:var(--f-mono); font-size:11.5px; color:var(--ink-3)}
+kbd{font-size:11px; background:var(--surface-2); border:1px solid var(--rule); border-bottom-width:2px;
+  border-radius:4px; padding:1px 5px; color:var(--ink-2)}
+
+.verdict{margin-top:14px; border-radius:8px; padding:12px 14px; display:flex; flex-direction:column; gap:6px;
+  font-size:15px; line-height:1.5}
+.verdict .vh{font-family:var(--f-display); font-weight:700; font-size:14.5px; display:flex; align-items:center; gap:7px}
+.verdict.ok{background:var(--accent-soft); color:var(--ink)}
+.verdict.ok .vh{color:var(--good)}
+.verdict.no{background:var(--rust-soft); color:var(--ink)}
+.verdict.no .vh{color:var(--rust)}
+.verdict .why{font-size:14.5px; color:var(--ink-2)}
+.verdict code{font-size:12.5px; background:var(--surface); padding:1px 5px; border-radius:4px; border:1px solid var(--rule)}
+
+details.disclose{margin-top:12px; border-top:1px solid var(--rule); padding-top:11px}
+details.disclose summary{font-family:var(--f-display); font-size:13.5px; font-weight:600;
+  color:var(--ink-2); cursor:pointer; list-style:none; display:flex; align-items:center; gap:7px}
+details.disclose summary::-webkit-details-marker{display:none}
+details.disclose summary::before{content:"+"; font-family:var(--f-mono); color:var(--accent); font-size:14px}
+details.disclose[open] summary::before{content:"\2212"}
+details.disclose summary:hover{color:var(--ink)}
+details.disclose .dbody{padding-top:10px; display:flex; flex-direction:column; gap:9px}
+pre.sql{font-family:var(--f-mono); font-size:12.5px; line-height:1.6; margin:0; white-space:pre-wrap;
+  background:var(--surface-2); border:1px solid var(--rule); border-radius:7px; padding:12px 13px; color:var(--ink); overflow-x:auto}
+
+/* ---------- result grid ---------- */
+.resultwrap{margin-top:16px; border-top:1px solid var(--rule); padding-top:14px}
+.reshead{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:9px}
+.reshead .cap{font-family:var(--f-display); font-size:11px; font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-3)}
+.reshead .cnt{font-family:var(--f-mono); font-size:11.5px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.tablescroll{overflow-x:auto; border:1px solid var(--rule); border-radius:7px; max-height:340px; overflow-y:auto}
+table.grid{border-collapse:collapse; width:100%; font-family:var(--f-mono); font-size:12.5px;
+  font-variant-numeric:tabular-nums; background:var(--surface)}
+table.grid th{position:sticky; top:0; z-index:1; text-align:left; font-weight:600; color:var(--ink-2);
+  background:var(--surface-2); padding:8px 11px; border-bottom:1px solid var(--rule-strong); white-space:nowrap}
+table.grid td{padding:7px 11px; border-bottom:1px solid var(--rule); color:var(--ink); white-space:nowrap}
+table.grid tr:last-child td{border-bottom:0}
+table.grid td.num{text-align:right}
+table.grid td.null{color:var(--ink-3); font-style:italic}
+.errbox{font-family:var(--f-mono); font-size:12.5px; line-height:1.55; color:var(--rust);
+  background:var(--rust-soft); border-radius:7px; padding:11px 13px; white-space:pre-wrap}
+
+/* ---------- schema rail ---------- */
+.schema{display:flex; flex-direction:column; gap:14px}
+.stable{display:flex; flex-direction:column; gap:4px}
+.stable .tname{font-family:var(--f-mono); font-size:12.5px; font-weight:600; color:var(--accent);
+  display:flex; align-items:baseline; gap:6px}
+.stable .tname .rows{font-size:10.5px; color:var(--ink-3); font-weight:400}
+.stable .cols{display:flex; flex-wrap:wrap; gap:3px}
+.stable .cols button{font-family:var(--f-mono); font-size:11px; color:var(--ink-2); background:var(--surface-2);
+  border:1px solid var(--rule); border-radius:4px; padding:2px 6px; cursor:pointer}
+.stable .cols button:hover{color:var(--accent); border-color:var(--accent)}
+.railnote{font-size:13px; color:var(--ink-2); line-height:1.45}
+
+/* ---------- criterio ---------- */
+.case{display:flex; flex-direction:column; gap:13px}
+.case .scenario{font-size:16.5px; line-height:1.55; max-width:66ch}
+.case .scenario b{font-weight:600}
+.opts{display:flex; flex-direction:column; gap:8px; max-width:70ch}
+.opt{display:flex; gap:11px; align-items:flex-start; text-align:left; cursor:pointer; width:100%;
+  background:var(--surface); border:1px solid var(--rule); border-radius:8px; padding:12px 14px;
+  font-family:var(--f-body); font-size:15.5px; line-height:1.5; color:var(--ink)}
+.opt:hover:not(:disabled){border-color:var(--rule-strong); background:var(--surface-2)}
+.opt .key{font-family:var(--f-mono); font-size:12px; color:var(--ink-3); flex:0 0 auto; padding-top:2px}
+.opt:disabled{cursor:default}
+.opt.picked-ok{border-color:var(--accent); background:var(--accent-soft)}
+.opt.picked-no{border-color:var(--rust); background:var(--rust-soft)}
+.opt.reveal-ok{border-color:var(--accent); background:var(--accent-soft)}
+.opt .why{display:block; margin-top:6px; font-size:14px; color:var(--ink-2)}
+.lesson{border-left:2px solid var(--accent); padding:3px 0 3px 14px; font-size:15.5px; line-height:1.55;
+  max-width:64ch; color:var(--ink)}
+.lesson .lbl{display:block; font-family:var(--f-display); font-size:10.5px; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-bottom:4px}
+
+/* ---------- charts ---------- */
+.figure{display:flex; flex-direction:column; gap:10px}
+.figcap{display:flex; flex-direction:column; gap:3px}
+.figcap h4{font-size:16px}
+.figcap .sub{font-size:13.5px; color:var(--ink-2); line-height:1.45}
+.legend{display:flex; flex-wrap:wrap; gap:14px; align-items:center}
+.legend span{display:inline-flex; align-items:center; gap:6px; font-family:var(--f-mono); font-size:11.5px; color:var(--ink-2)}
+.legend i{width:14px; height:2px; border-radius:2px; display:block}
+.chartbox{position:relative; overflow-x:auto}
+.chartbox svg{display:block; max-width:100%; height:auto}
+.tip{position:absolute; pointer-events:none; z-index:5; background:var(--surface); border:1px solid var(--rule-strong);
+  border-radius:7px; box-shadow:var(--shadow); padding:8px 10px; font-family:var(--f-mono); font-size:11.5px;
+  color:var(--ink); white-space:nowrap; font-variant-numeric:tabular-nums; transform:translate(-50%,-114%)}
+.tip[hidden]{display:none}
+.tip .r{display:flex; align-items:center; gap:6px; justify-content:space-between}
+.tip .r i{width:8px; height:8px; border-radius:2px; display:inline-block; flex:0 0 auto}
+.tip .d{color:var(--ink-3); margin-bottom:4px}
+.heat{border-collapse:separate; border-spacing:2px; font-family:var(--f-mono); font-size:11.5px;
+  font-variant-numeric:tabular-nums}
+.heat th{font-weight:500; color:var(--ink-3); font-size:10.5px; padding:3px 6px; text-align:center; white-space:nowrap}
+.heat th.rowlab{text-align:left; color:var(--ink-2)}
+.heat td{padding:6px 9px; text-align:center; border-radius:4px; color:var(--ink); min-width:44px}
+.heat td.empty{background:transparent; color:var(--ink-3)}
+.scale{display:flex; align-items:center; gap:7px; font-family:var(--f-mono); font-size:11px; color:var(--ink-3)}
+.scale .ramp{display:flex; gap:2px}
+.scale .ramp i{width:20px; height:9px; border-radius:2px; display:block}
+
+/* ---------- terreno ---------- */
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(158px,1fr)); gap:1px;
+  background:var(--rule); border:1px solid var(--rule); border-radius:9px; overflow:hidden}
+.stat{background:var(--surface); padding:15px 16px; display:flex; flex-direction:column; gap:4px}
+.stat .v{font-family:var(--f-mono); font-size:25px; font-weight:600; color:var(--ink); line-height:1;
+  font-variant-numeric:tabular-nums}
+.stat .k{font-size:13.5px; color:var(--ink-2); line-height:1.35}
+.split{display:grid; grid-template-columns:repeat(auto-fit,minmax(268px,1fr)); gap:20px}
+.col-h{font-family:var(--f-display); font-size:11px; font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:7px}
+.col-h.auto{color:var(--rust)}
+.col-h.human{color:var(--accent)}
+ul.plain{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px}
+ul.plain li{font-size:15.5px; line-height:1.5; padding-left:15px; position:relative; color:var(--ink)}
+ul.plain li::before{content:""; position:absolute; left:0; top:.62em; width:5px; height:5px;
+  border-radius:1px; background:var(--rule-strong)}
+ul.plain.auto li::before{background:var(--rust)}
+ul.plain.human li::before{background:var(--accent)}
+.sources{display:flex; flex-direction:column; gap:6px; font-size:13.5px; color:var(--ink-2)}
+.sources a{color:var(--ink-2); text-decoration:underline; text-underline-offset:2px}
+.sources a:hover{color:var(--accent)}
+.footer{border-top:1px solid var(--rule); padding-top:16px; margin-top:8px; font-size:13.5px;
+  color:var(--ink-3); line-height:1.5; max-width:66ch}
+.loading{display:flex; align-items:center; gap:10px; font-family:var(--f-mono); font-size:13px; color:var(--ink-2)}
+.spin{width:13px; height:13px; border:2px solid var(--rule-strong); border-top-color:var(--accent);
+  border-radius:50%; animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+<div class="shell">
+  <header class="masthead">
+    <div class="brand">
+      <h1>Query <span class="amp">&amp;</span> Criterio</h1>
+      <p class="tagline">Las dos mitades del oficio: sacar el número sin equivocarte, y saber si el número significa algo. Con SQLite corriendo de verdad acá adentro.</p>
+    </div>
+    <div class="mast-side">
+      <button class="themebtn" id="theme-toggle" type="button">Tema</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="rail" aria-label="Secciones">
+      <div class="navlist" id="navlist">
+        <button type="button" data-view="ruta" aria-current="true"><span class="n">01</span>Ruta</button>
+        <button type="button" data-view="lab"><span class="n">02</span>Lab SQL</button>
+        <button type="button" data-view="criterio"><span class="n">03</span>Criterio</button>
+        <button type="button" data-view="terreno"><span class="n">04</span>Terreno 2026</button>
+      </div>
+      <div class="railbox">
+        <span class="lbl">Tu avance</span>
+        <div class="meter"><i id="meter-fill" style="width:0%"></i></div>
+        <span class="num" id="meter-num">0 / 0</span>
+        <button class="reset" id="reset-progress" type="button">Borrar avance</button>
+      </div>
+    </nav>
+
+    <main class="content">
+
+    <!-- ================= RUTA ================= -->
+    <section class="view" id="view-ruta">
+      <div class="sec-h">
+        <span class="eyebrow">01 &middot; La ruta</span>
+        <h2>De cero a analista, en el orden que realmente importa</h2>
+      </div>
+      <p class="lede">Casi todos arrancan por la herramienta y terminan sabiendo escribir queries que nadie pidió. El orden útil es al revés: <em>primero la pregunta</em>, después el dato, y la herramienta al final. Cada nivel de abajo tiene un criterio de salida concreto — no &laquo;vi el curso&raquo;, sino algo que podés hacer.</p>
+
+      <div class="track">
+
+        <article class="stage">
+          <div class="stage-mark"><span class="lvl">01</span><span class="wks">1&ndash;2 sem</span></div>
+          <div class="stage-body">
+            <h3>La pregunta antes que el dato</h3>
+            <p class="what">Traducir un pedido vago (&laquo;¿cómo venimos?&raquo;) a una pregunta que tiene una respuesta verificable: qué población, qué ventana de tiempo, qué se compara contra qué, y qué decisión cambia según el resultado. Definir métricas sin ambigüedad: numerador, denominador, granularidad, criterio de corte.</p>
+            <div class="chips"><span class="chip">definición de métrica</span><span class="chip">población y ventana</span><span class="chip">métrica vs. señal</span><span class="chip">árbol de KPIs</span></div>
+            <div class="done-when">
+              <span class="lbl">Listo cuando</span>
+              <p>Podés escribir la definición de &laquo;cliente activo&raquo; de tal forma que dos personas la implementen por separado y les dé el mismo número.</p>
+            </div>
+            <p class="trap"><b>Trampa</b>Empezar a consultar antes de escribir la pregunta. Si no sabés qué decisión depende del resultado, no estás analizando: estás generando tablas.</p>
+          </div>
+        </article>
+
+        <article class="stage">
+          <div class="stage-mark"><span class="lvl">02</span><span class="wks">3&ndash;5 sem</span></div>
+          <div class="stage-body">
+            <h3>SQL: filtrar, agrupar, no mentirte</h3>
+            <p class="what"><code>SELECT / WHERE / GROUP BY / HAVING / ORDER BY</code>, agregaciones, <code>CASE WHEN</code>, manejo de <code>NULL</code>, y el orden real de ejecución (<code>FROM &rarr; WHERE &rarr; GROUP BY &rarr; HAVING &rarr; SELECT &rarr; ORDER BY</code>), que es lo que explica el 80% de los errores de principiante.</p>
+            <div class="chips"><span class="chip">agregaciones</span><span class="chip">NULL</span><span class="chip">CASE WHEN</span><span class="chip">orden de ejecución</span><span class="chip">tipos y casting</span></div>
+            <div class="done-when">
+              <span class="lbl">Listo cuando</span>
+              <p>Explicás sin dudar por qué <code>COUNT(columna)</code> y <code>COUNT(*)</code> dan distinto, y por qué un filtro sobre un agregado va en <code>HAVING</code> y no en <code>WHERE</code>.</p>
+            </div>
+            <p class="trap"><b>Trampa</b>Promediar promedios. El promedio de los promedios diarios no es el promedio del período salvo que todos los días pesen igual.</p>
+          </div>
+        </article>
+
+        <article class="stage">
+          <div class="stage-mark"><span class="lvl">03</span><span class="wks">4&ndash;6 sem</span></div>
+          <div class="stage-body">
+            <h3>SQL de analista: joins, ventanas, cohortes</h3>
+            <p class="what">Los cuatro <code>JOIN</code> y qué le pasa al conteo de filas con cada uno (el <em>fan-out</em> silencioso que infla la facturación). Funciones de ventana: <code>ROW_NUMBER</code>, <code>LAG</code>, <code>SUM() OVER</code>, medias móviles, máximos acumulados. CTEs para partir un problema en pasos legibles. Análisis de cohortes y retención.</p>
+            <div class="chips"><span class="chip">LEFT / INNER / anti-join</span><span class="chip">window functions</span><span class="chip">CTE</span><span class="chip">retención por cohorte</span><span class="chip">self-join</span></div>
+            <div class="done-when">
+              <span class="lbl">Listo cuando</span>
+              <p>Armás una tabla de retención mes a mes desde cero y detectás un fan-out mirando el conteo de filas antes y después de un join.</p>
+            </div>
+            <p class="trap"><b>Trampa</b>Un <code>LEFT JOIN</code> con condición en el <code>WHERE</code> en vez del <code>ON</code>: lo convertís en <code>INNER JOIN</code> sin darte cuenta y perdés justo las filas que querías conservar.</p>
+          </div>
+        </article>
+
+        <article class="stage">
+          <div class="stage-mark"><span class="lvl">04</span><span class="wks">4&ndash;6 sem</span></div>
+          <div class="stage-body">
+            <h3>La estadística que se usa (y sólo esa)</h3>
+            <p class="what">Distribuciones y por qué la mediana le gana a la media en datos de plata. Variabilidad: desvío, percentiles, outliers. Incertidumbre: intervalos de confianza y tamaño de muestra. Tests A/B leídos bien: qué significa un p-valor, qué es el efecto mínimo detectable, y por qué mirar el test todos los días lo rompe. Correlación, regresión simple, y confusión.</p>
+            <div class="chips"><span class="chip">mediana y percentiles</span><span class="chip">intervalo de confianza</span><span class="chip">A/B testing</span><span class="chip">Simpson</span><span class="chip">sesgo de selección</span><span class="chip">regresión lineal</span></div>
+            <div class="done-when">
+              <span class="lbl">Listo cuando</span>
+              <p>Ante un resultado &laquo;+8% con p = 0,04&raquo; preguntás primero cuántas variantes se probaron y cuándo se decidió parar el test.</p>
+            </div>
+            <p class="trap"><b>Trampa</b>Confundir significancia estadística con relevancia de negocio. Con muestra grande, todo da significativo; la pregunta es si el efecto paga el costo de implementarlo.</p>
+          </div>
+        </article>
+
+        <article class="stage">
+          <div class="stage-mark"><span class="lvl">05</span><span class="wks">3&ndash;4 sem</span></div>
+          <div class="stage-body">
+            <h3>Visualización y la conversación difícil</h3>
+            <p class="what">Elegir la forma según el trabajo del dato: magnitud, composición, cambio en el tiempo, relación. Escalas honestas, ejes que empiezan donde deben, y color como codificación y no como decoración. Después, lo que separa a un analista senior: presentar el hallazgo con la recomendación adelante, la incertidumbre declarada y el próximo paso definido.</p>
+            <div class="chips"><span class="chip">forma según el dato</span><span class="chip">escalas honestas</span><span class="chip">color como código</span><span class="chip">executive summary</span><span class="chip">Power BI / Looker</span></div>
+            <div class="done-when">
+              <span class="lbl">Listo cuando</span>
+              <p>Tu reporte se puede leer en 30 segundos y en 30 minutos: la conclusión y la acción arriba, el método y los supuestos abajo.</p>
+            </div>
+            <p class="trap"><b>Trampa</b>El dashboard de 40 gráficos. Si no hay una jerarquía que diga qué mirar primero, nadie mira nada.</p>
+          </div>
+        </article>
+
+        <article class="stage">
+          <div class="stage-mark"><span class="lvl">06</span><span class="wks">continuo</span></div>
+          <div class="stage-body">
+            <h3>Python, el stack y la reproducibilidad</h3>
+            <p class="what">Python cuando SQL se queda corto: <code>pandas</code>/<code>polars</code> para transformaciones que no entran en una query, notebooks para explorar, scripts para lo que se repite. Git como higiene básica. Modelado en capas y tests sobre los datos (<code>dbt</code>): definir la métrica una vez, versionarla, y que todo lo demás la consuma.</p>
+            <div class="chips"><span class="chip">pandas / polars</span><span class="chip">Git</span><span class="chip">dbt</span><span class="chip">capa semántica</span><span class="chip">DuckDB</span><span class="chip">tests de datos</span></div>
+            <div class="done-when">
+              <span class="lbl">Listo cuando</span>
+              <p>Alguien corre tu análisis seis meses después, sobre datos nuevos, y le da lo mismo que a vos — sin que le expliques nada.</p>
+            </div>
+            <p class="trap"><b>Trampa</b>Saltar acá desde el nivel 1 porque suena más profesional. Un analista que sabe dbt pero no sabe definir una métrica produce pipelines prolijos de números equivocados.</p>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ================= LAB ================= -->
+    <section class="view" id="view-lab" hidden>
+      <div class="sec-h">
+        <span class="eyebrow">02 &middot; Lab SQL</span>
+        <h2>Un SQLite de verdad, dos bases, quince ejercicios</h2>
+      </div>
+      <p class="lede">Esto no corrige texto: <em>ejecuta tu query</em> contra una base real en tu navegador y compara el resultado contra la solución. Si llegás al mismo resultado por otro camino, cuenta igual.</p>
+
+      <div id="boot" class="loading"><span class="spin"></span><span>Levantando el motor SQLite&hellip;</span></div>
+
+      <div id="lab" hidden>
+        <div id="dataset-figure"></div>
+
+        <div class="labgrid" style="margin-top:22px">
+          <div class="panel">
+            <div class="panel-h">
+              <div class="qbar">
+                <div class="dbtabs" role="group" aria-label="Base de datos">
+                  <button type="button" data-db="mercado" aria-pressed="true">Mercado</button>
+                  <button type="button" data-db="tienda" aria-pressed="false">Tienda</button>
+                </div>
+              </div>
+              <div class="exnav">
+                <button type="button" id="ex-prev" aria-label="Ejercicio anterior">&larr;</button>
+                <span class="pos" id="ex-pos">1/7</span>
+                <button type="button" id="ex-next" aria-label="Ejercicio siguiente">&rarr;</button>
+              </div>
+            </div>
+            <div class="panel-b">
+              <div class="exlist" id="ex-list"></div>
+              <hr class="rule" style="margin:14px 0">
+              <div id="ex-body"></div>
+            </div>
+          </div>
+
+          <aside class="panel">
+            <div class="panel-h"><h3>Esquema</h3></div>
+            <div class="panel-b">
+              <div class="schema" id="schema"></div>
+              <p class="railnote" style="margin-top:14px">Tocá una columna para insertarla en el editor. Podés escribir cualquier consulta, no sólo la del ejercicio.</p>
+            </div>
+          </aside>
+        </div>
+
+        <p class="note" id="data-disclaimer" style="margin-top:18px"></p>
+      </div>
+    </section>
+
+    <!-- ================= CRITERIO ================= -->
+    <section class="view" id="view-criterio" hidden>
+      <div class="sec-h">
+        <span class="eyebrow">03 &middot; Criterio</span>
+        <h2>Los casos donde el SQL está bien y la conclusión está mal</h2>
+      </div>
+      <p class="lede">Esta es la parte que no se automatizó. En cada caso el número es correcto: lo que está en juego es <em>qué significa</em> y qué harías con él. Elegí y después leé por qué las otras opciones fallan — ahí está el aprendizaje, no en acertar.</p>
+      <div id="cases" style="display:flex; flex-direction:column; gap:24px"></div>
+    </section>
+
+    <!-- ================= TERRENO ================= -->
+    <section class="view" id="view-terreno" hidden>
+      <div class="sec-h">
+        <span class="eyebrow">04 &middot; Terreno 2026</span>
+        <h2>Cómo está el rol hoy, sin marketing de bootcamp</h2>
+      </div>
+      <p class="lede">Datos de relevamientos publicados en 2026 sobre avisos reales y sobre el impacto de la IA en el día a día del puesto. Las fuentes están al pie: son artículos de industria, no papers — <em>tomá los números como orden de magnitud</em>, no como verdad exacta.</p>
+
+      <div class="stats">
+        <div class="stat"><span class="v">81%</span><span class="k">de los avisos piden Excel / Sheets</span></div>
+        <div class="stat"><span class="v">60%</span><span class="k">piden SQL &mdash; en algunos relevamientos supera el 80%</span></div>
+        <div class="stat"><span class="v">43%</span><span class="k">piden Power BI u otra herramienta de BI</span></div>
+        <div class="stat"><span class="v">41%</span><span class="k">piden Python (o R)</span></div>
+      </div>
+      <p class="note">Base: 328 descripciones de puesto reales relevadas en 2026 (AccioJob). Otros relevamientos del mismo año sobre ~500 avisos dan proporciones parecidas: SQL en más del 80%, BI en más de la mitad.</p>
+
+      <hr class="rule">
+
+      <div class="split">
+        <div>
+          <div class="col-h auto">Lo que la IA se llevó</div>
+          <ul class="plain auto">
+            <li><b>Escribir el SQL de rutina.</b> Consultas descriptivas, agrupaciones estándar, el primer borrador de casi cualquier query.</li>
+            <li><b>Limpieza básica.</b> Formatos de fecha, normalizar categorías, detectar duplicados obvios.</li>
+            <li><b>Reportería repetitiva.</b> El informe semanal que siempre tenía la misma forma.</li>
+            <li><b>La primera visualización.</b> El gráfico exploratorio ya no lo hacés a mano.</li>
+          </ul>
+          <p class="note" style="margin-top:12px">Estimaciones de industria ubican esto en torno al 30&ndash;40% de las tareas que ocupaban la semana de un analista en 2024.</p>
+        </div>
+        <div>
+          <div class="col-h human">Lo que quedó del lado humano</div>
+          <ul class="plain human">
+            <li><b>Formular la pregunta correcta.</b> Nadie te va a pedir la métrica que necesita; te va a pedir &laquo;un reporte&raquo;.</li>
+            <li><b>Decidir si el patrón es real.</b> La IA encuentra el patrón; que sea señal o ruido lo decidís vos.</li>
+            <li><b>Validar contra la realidad del negocio.</b> Un número que no puede ser, no es. Eso requiere contexto que el modelo no tiene.</li>
+            <li><b>Sostener la recomendación.</b> Defender una decisión frente a alguien que no quiere escucharla.</li>
+            <li><b>Conocer las cañerías.</b> De dónde sale el dato, quién lo carga y con qué error sistemático.</li>
+          </ul>
+        </div>
+      </div>
+
+      <hr class="rule">
+
+      <div class="prose">
+        <div class="sec-h"><h3 style="font-size:19px">Qué significa esto para cómo estudiás</h3></div>
+        <p>La consecuencia práctica es incómoda: <strong>la barrera de entrada bajó y la vara de contratación subió</strong>. Cualquiera produce una query decente con un modelo al lado, así que mostrar que sabés escribir SQL ya no diferencia. Lo que diferencia es el criterio: encontrar el error en un resultado que parece razonable, elegir la métrica que no se puede gamear, y decir &laquo;este dato no alcanza para responder eso&raquo;.</p>
+        <p>Traducido a tu plan de estudio: no dediques tiempo a memorizar sintaxis — eso lo resolvés en el momento. Dedicá tiempo a <strong>equivocarte con datos reales y descubrir por qué</strong>. Por eso el Lab de acá al lado compara resultados y no texto, y por eso la sección de Criterio existe.</p>
+        <p>Y una advertencia sobre el atajo obvio: si le pedís la query a un modelo, la pegás y anda, no aprendiste nada verificable. Usalo al revés — escribí la tuya primero, después pedile que la critique. La revisión enseña; la generación no.</p>
+      </div>
+
+      <hr class="rule">
+
+      <div class="prose">
+        <div class="sec-h"><h3 style="font-size:19px">El stack, ordenado por lo que te conviene aprender</h3></div>
+        <p><strong>Lo que te contrata:</strong> SQL, una hoja de cálculo bien usada, y una herramienta de BI. Ese trío aparece en la mayoría de los avisos y es lo que vas a tocar el primer día.</p>
+        <p><strong>Lo que te hace escalar:</strong> Python para lo que no entra en una query, Git para no ser el que manda archivos por mail, y <code>dbt</code> — que en 2026 pasó a ser el estándar de facto para modelar en el warehouse: versionás la transformación, la testeás y la documentás como código.</p>
+        <p><strong>Lo que conviene entender aunque no lo operes:</strong> la <em>capa semántica</em> (definir la métrica una sola vez para que el dashboard, el reporte y el asistente de IA devuelvan el mismo número) y <code>DuckDB</code>, que hace que un análisis de millones de filas corra en tu laptop sin infraestructura. Para practicar en serio, DuckDB sobre archivos locales es hoy el camino más corto.</p>
+      </div>
+
+      <hr class="rule">
+
+      <div class="prose">
+        <div class="sec-h"><h3 style="font-size:19px">Números de compensación, con el asterisco puesto</h3></div>
+        <p>Para alguien en Argentina hay dos mercados distintos y conviene no mezclarlos. En el <strong>mercado local</strong>, los relevamientos de 2026 ubican al analista de datos en torno a los <strong>USD 15.000 anuales</strong> promedio, con junior arrancando alrededor de USD 9.500&ndash;12.600 y senior llegando a USD 19.000&ndash;28.000. En <strong>remoto para empresas de EE.&nbsp;UU. desde LatAm</strong>, la mediana relevada ronda los <strong>USD 29.000 anuales</strong> para nivel medio (~USD 2.400/mes), con entrada cerca de USD 1.580/mes y senior arriba de USD 3.300/mes.</p>
+        <p class="note">Son estimaciones de agregadores salariales, no datos oficiales, y la dispersión entre fuentes es alta. Sirven para dimensionar la brecha local/remoto — que es el dato accionable — no para negociar un número puntual.</p>
+      </div>
+
+      <hr class="rule">
+      <div class="sources">
+        <span class="eyebrow" style="margin-bottom:2px">Fuentes</span>
+        <a href="https://acciojob.com/blogs/latest/most-in-demand-data-analytics-skills-in-2026-based-on-328-real-job-descriptions" target="_blank" rel="noopener">AccioJob &mdash; Most In-Demand Data Analytics Skills in 2026 (328 job descriptions)</a>
+        <a href="https://medium.com/ai-analytics-diaries/i-analyzed-500-data-science-job-posts-in-2026-heres-exactly-what-they-want-eaac5980590b" target="_blank" rel="noopener">Analyst Uttam &mdash; I Analyzed 500 Data Science Job Posts in 2026</a>
+        <a href="https://www.infoworld.com/article/4058946/how-ai-changes-the-data-analyst-role.html" target="_blank" rel="noopener">InfoWorld &mdash; How AI changes the data analyst role</a>
+        <a href="https://improvado.io/blog/will-ai-replace-data-analysts" target="_blank" rel="noopener">Improvado &mdash; Will AI Replace Data Analysts? 2026 Reality Check</a>
+        <a href="https://www.forbes.com/councils/forbestechcouncil/2026/07/28/how-ai-is-reshaping-the-role-of-the-data-analyst/" target="_blank" rel="noopener">Forbes Tech Council &mdash; How AI Is Reshaping The Role Of The Data Analyst</a>
+        <a href="https://hiretalent.lat/salaries/data-analyst" target="_blank" rel="noopener">HireTalent LatAm &mdash; Data Analyst Salary in Latin America (2026)</a>
+        <a href="https://jobicy.com/salaries/ar/financial-data-analyst" target="_blank" rel="noopener">Jobicy &mdash; Financial Data Analyst Salary in Argentina (2026)</a>
+        <a href="https://valiotti.com/modern-data-stack-2026/" target="_blank" rel="noopener">Valiotti Data &mdash; Modern Data Stack 2026</a>
+      </div>
+
+      <p class="footer">Consultado en septiembre de 2026. Los porcentajes de avisos vienen de relevamientos privados con metodologías distintas entre sí; las cifras de automatización son estimaciones de industria, no mediciones. Contrastá con avisos reales de tu mercado antes de decidir qué estudiar.</p>
+    </section>
+
+    </main>
+  </div>
+</div>
+<script>
+/* =====================================================================
+   Generación de datos. Semilla fija => todos ven exactamente la misma base,
+   y las soluciones de referencia siempre coinciden.
+   ===================================================================== */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const R = mulberry32(20260910);
+function gauss(){let u=0,v=0;while(u===0)u=R();while(v===0)v=R();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function pick(arr){return arr[Math.floor(R()*arr.length)]}
+function weighted(pairs){let t=0;for(const p of pairs)t+=p[1];let x=R()*t;for(const p of pairs){x-=p[1];if(x<=0)return p[0]}return pairs[pairs.length-1][0]}
+function r2(x){return Math.round(x*100)/100}
+function iso(d){return d.toISOString().slice(0,10)}
+function addDays(d,n){const c=new Date(d.getTime());c.setUTCDate(c.getUTCDate()+n);return c}
+
+const START = new Date(Date.UTC(2025,8,8));   // 2025-09-08
+const END   = new Date(Date.UTC(2026,8,9));   // 2026-09-09
+
+const TRADING_DAYS = (function(){
+  const out=[]; let d=new Date(START.getTime());
+  while(d<=END){const w=d.getUTCDay(); if(w!==0&&w!==6) out.push(iso(d)); d=addDays(d,1);} return out;
+})();
+
+const ASSETS = [
+  {ticker:'IDX', name:'ETF Índice Global',       asset_class:'ETF',    region:'Global', beta:1.00, vol:0.14, drift:0.090, p0:100.0, yld:0.015, vbase:52e6},
+  {ticker:'SEMI',name:'Semiconductores',          asset_class:'Acción', region:'EEUU',   beta:1.65, vol:0.38, drift:0.230, p0:142.0, yld:0.002, vbase:31e6},
+  {ticker:'CLDX',name:'Software en la nube',      asset_class:'Acción', region:'EEUU',   beta:1.30, vol:0.32, drift:0.110, p0: 78.0, yld:0.000, vbase:9e6},
+  {ticker:'BANK',name:'Banco emergente',          asset_class:'Acción', region:'LatAm',  beta:1.35, vol:0.42, drift:0.055, p0: 22.0, yld:0.030, vbase:6e6},
+  {ticker:'ENER',name:'Energía emergente',        asset_class:'Acción', region:'LatAm',  beta:1.10, vol:0.36, drift:0.105, p0: 34.0, yld:0.045, vbase:4e6},
+  {ticker:'BRZL',name:'ETF Brasil',               asset_class:'ETF',    region:'LatAm',  beta:1.05, vol:0.28, drift:0.035, p0: 29.0, yld:0.050, vbase:12e6},
+  {ticker:'BOND',name:'ETF Bonos largos',         asset_class:'ETF',    region:'Global', beta:-0.25,vol:0.12, drift:0.020, p0: 92.0, yld:0.038, vbase:18e6},
+  {ticker:'GOLD',name:'ETF Oro',                  asset_class:'ETF',    region:'Global', beta:0.05, vol:0.15, drift:0.075, p0:190.0, yld:0.000, vbase:8e6}
+];
+
+function buildMarket(){
+  const SQ=Math.sqrt(252), MKT_VOL=0.14, MKT_DRIFT=0.09;
+  const mkt = TRADING_DAYS.map(()=> MKT_DRIFT/252 + (MKT_VOL/SQ)*gauss());
+  const prices=[];
+  for(const a of ASSETS){
+    const idio = Math.sqrt(Math.max(a.vol*a.vol - a.beta*a.beta*MKT_VOL*MKT_VOL, 0.0004));
+    const alpha = (a.drift - a.beta*MKT_DRIFT)/252;
+    let px = a.p0;
+    for(let i=0;i<TRADING_DAYS.length;i++){
+      const ret = a.beta*mkt[i] + alpha + (idio/SQ)*gauss();
+      const prev = px;
+      px = prev*(1+ret);
+      const gap  = prev*(1 + (a.vol/SQ)*0.35*gauss());
+      const open = Math.max(gap, 0.01);
+      const span = Math.abs(px-open) + prev*(a.vol/SQ)*0.55*Math.abs(gauss());
+      const high = Math.max(open,px) + span*0.45*R();
+      const low  = Math.max(0.01, Math.min(open,px) - span*0.45*R());
+      const vol  = Math.round(a.vbase*(0.62+0.76*R())*(1+5.5*Math.abs(ret)));
+      prices.push([a.ticker, TRADING_DAYS[i], r2(open), r2(high), r2(low), r2(px), vol]);
+    }
+  }
+  // dividendos trimestrales para los que pagan
+  const divs=[];
+  const exIdx=[42,105,168,231];
+  for(const a of ASSETS){
+    if(a.yld<=0) continue;
+    for(const i of exIdx){
+      const day=TRADING_DAYS[i];
+      const px = prices.find(p=>p[0]===a.ticker&&p[1]===day)[5];
+      divs.push([a.ticker, day, r2(px*a.yld/4)]);
+    }
+  }
+  // un portafolio ficticio para practicar P&L
+  const pos=[
+    ['IDX', 18, 120], ['SEMI', 40, 30], ['BOND', 22, 150],
+    ['ENER', 95, 60], ['GOLD', 12, 200], ['BANK', 130, 15], ['BRZL', 60, 90]
+  ].map((p,i)=>{
+    const day = TRADING_DAYS[p[2]];
+    const px  = prices.find(q=>q[0]===p[0]&&q[1]===day)[5];
+    return [i+1, p[0], day, p[1], r2(px*(1+0.004*gauss()))];
+  });
+  return {prices, divs, pos};
+}
+
+/* ---------------- tienda: e-commerce sintético ---------------- */
+const COUNTRIES=[['AR',34],['BR',26],['MX',18],['CL',12],['US',10]];
+const CHANNELS =[['organic',30],['paid_search',24],['paid_social',22],['referral',13],['email',11]];
+const CATS=['Café','Té','Accesorios','Suscripción','Regalos'];
+
+function buildShop(){
+  const products=[];
+  const catCost={'Café':[9,26],'Té':[6,18],'Accesorios':[11,54],'Suscripción':[19,38],'Regalos':[14,42]};
+  const names={'Café':['Etiopía Yirgacheffe','Colombia Huila','Brasil Cerrado','Blend Casa','Descafeinado Suave','Guatemala Antigua'],
+    'Té':['Sencha Verde','Earl Grey','Rooibos','Menta Marroquí','Chai Especiado'],
+    'Accesorios':['Prensa Francesa','Molinillo Manual','Filtro V60','Termo 500ml','Balanza Digital','Kettle Cuello Ganso'],
+    'Suscripción':['Plan Mensual 250g','Plan Mensual 500g','Plan Quincenal','Plan Degustación'],
+    'Regalos':['Caja Origen','Set Iniciación','Caja Degustación']};
+  let pid=1;
+  for(const c of CATS){
+    for(const n of names[c]){
+      const [lo,hi]=catCost[c];
+      const cost = r2(lo + R()*(hi-lo));
+      const margin = c==='Suscripción'? 1.9 : c==='Accesorios'? 2.25 : 2.6;
+      products.push([pid++, n, c, cost, r2(cost*margin*(0.9+0.2*R()))]);
+    }
+  }
+  const customers=[], orders=[], items=[];
+  const N=620; let oid=1, itemId=1;
+  const chanQuality={organic:1.00, referral:1.05, email:0.95, paid_search:0.85, paid_social:0.62};
+  for(let cid=1;cid<=N;cid++){
+    const signOffset = Math.floor(Math.pow(R(),0.85)*330);
+    const signup = addDays(START, signOffset);
+    const country = weighted(COUNTRIES);
+    const channel = weighted(CHANNELS);
+    const segment = R()<0.14 ? 'mayorista' : 'minorista';
+    customers.push([cid, iso(signup), country, channel, segment]);
+    // primera compra + recompras con decaimiento; el canal pago retiene peor
+    const q = chanQuality[channel] * (segment==='mayorista'?1.55:1);
+    let day = signOffset + Math.floor(R()*4);
+    let n=0;
+    while(day<=366 && n<14){
+      const d = addDays(START, day);
+      const status = weighted([['completed',92],['refunded',4],['cancelled',4]]);
+      const nItems = segment==='mayorista' ? 1+Math.floor(R()*4) : (R()<0.55?1:(R()<0.8?2:3));
+      let revenue=0;
+      const chosen=new Set();
+      for(let k=0;k<nItems;k++){
+        let p = products[Math.floor(R()*products.length)];
+        let guard=0; while(chosen.has(p[0])&&guard++<6) p=products[Math.floor(R()*products.length)];
+        chosen.add(p[0]);
+        const qty = segment==='mayorista' ? 4+Math.floor(R()*22) : 1+Math.floor(R()*2);
+        const unit = r2(p[4]*(segment==='mayorista'?0.78:1)*(0.96+0.08*R()));
+        items.push([itemId++, oid, p[0], qty, unit, p[3]]);
+        revenue += qty*unit;
+      }
+      const discount = R()<0.28 ? r2(revenue*(0.05+0.15*R())) : 0;
+      const ship = segment==='mayorista' ? r2(9+R()*22) : (revenue>60?0:r2(4+R()*6));
+      orders.push([oid, cid, iso(d), status, r2(revenue), discount, ship]);
+      oid++; n++;
+      const pRepeat = 0.58*q*Math.pow(0.86, n);
+      if(R()>pRepeat) break;
+      day += 12 + Math.floor(Math.pow(R(),1.6)*95);
+    }
+  }
+  // inversión de marketing mensual por canal pago
+  const spend=[];
+  const months=[];
+  for(let m=0;m<13;m++){const d=new Date(Date.UTC(2025,8+m,1)); months.push(iso(d).slice(0,7));}
+  const base={paid_search:4200, paid_social:5100, email:900};
+  for(const mo of months){
+    for(const ch of Object.keys(base)){
+      spend.push([mo, ch, r2(base[ch]*(0.72+0.6*R()))]);
+    }
+  }
+  return {products, customers, orders, items, spend};
+}
+</script>
+<script>
+/* =====================================================================
+   Ejercicios. `sql` es la solución de referencia: se ejecuta y se compara
+   el RESULTADO, no el texto. Cualquier camino que llegue al mismo cuadro vale.
+   ===================================================================== */
+const EXERCISES = [
+/* ---------------------------- MERCADO ---------------------------- */
+{db:'mercado', level:1, title:'Los días que se movió el volumen',
+ ask:'Traé las 5 ruedas de mayor volumen operado de <code>SEMI</code>. Mostrá <code>date</code>, <code>volume</code> y <code>close</code>, de mayor a menor volumen.',
+ teaches:'Filtrar, ordenar y cortar. El 90% de las consultas exploratorias son exactamente esta forma.',
+ hint:'<code>WHERE</code> para quedarte con un ticker, <code>ORDER BY ... DESC</code> y <code>LIMIT</code>.',
+ ordered:true,
+ sql:`SELECT date, volume, close
+FROM prices
+WHERE ticker = 'SEMI'
+ORDER BY volume DESC
+LIMIT 5;`},
+
+{db:'mercado', level:1, title:'Rango de precios por activo',
+ ask:'Por cada <code>ticker</code>: cuántas ruedas tiene, su cierre mínimo y su cierre máximo. Ordenado por ticker alfabéticamente.',
+ teaches:'<code>GROUP BY</code> con varias agregaciones. Es el primer paso de todo perfilado de datos: antes de analizar, mirá los extremos.',
+ hint:'Una fila por ticker: <code>GROUP BY ticker</code> con <code>COUNT(*)</code>, <code>MIN(close)</code> y <code>MAX(close)</code>.',
+ ordered:true,
+ sql:`SELECT ticker, COUNT(*) AS ruedas, MIN(close) AS min_close, MAX(close) AS max_close
+FROM prices
+GROUP BY ticker
+ORDER BY ticker;`},
+
+{db:'mercado', level:2, title:'La foto del último día',
+ ask:'El cierre del <strong>último día disponible</strong> de cada activo, junto con su nombre y clase. Columnas: <code>ticker</code>, <code>name</code>, <code>asset_class</code>, <code>close</code>. Ordenado por cierre descendente.',
+ teaches:'La subconsulta para encontrar &laquo;lo más reciente&raquo; y el join con la tabla de dimensiones. Ojo: la fecha máxima hay que buscarla, no hardcodearla.',
+ hint:'Filtrá <code>date = (SELECT MAX(date) FROM prices)</code> y uní con <code>assets</code>.',
+ ordered:true,
+ sql:`SELECT p.ticker, a.name, a.asset_class, p.close
+FROM prices p
+JOIN assets a ON a.ticker = p.ticker
+WHERE p.date = (SELECT MAX(date) FROM prices)
+ORDER BY p.close DESC;`},
+
+{db:'mercado', level:2, title:'Retorno del período, en base 100',
+ ask:'Retorno porcentual de cada activo entre su primera y su última rueda: <code>ticker</code> y <code>retorno_pct</code> <strong>redondeado a 2 decimales</strong>, de mayor a menor.',
+ teaches:'Indexar a una base común es la única forma honesta de comparar activos de precios muy distintos. Un ETF de 190 y una acción de 22 no se comparan por precio.',
+ hint:'Necesitás el primer y el último cierre por ticker. <code>FIRST_VALUE(...) OVER (PARTITION BY ticker ORDER BY date)</code> resuelve las dos puntas, o hacelo con dos subconsultas.',
+ ordered:true,
+ sql:`WITH bordes AS (
+  SELECT ticker,
+         FIRST_VALUE(close) OVER (PARTITION BY ticker ORDER BY date) AS primero,
+         LAST_VALUE(close)  OVER (PARTITION BY ticker ORDER BY date
+                                  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS ultimo
+  FROM prices
+)
+SELECT ticker, ROUND((ultimo / primero - 1) * 100, 2) AS retorno_pct
+FROM bordes
+GROUP BY ticker, primero, ultimo
+ORDER BY retorno_pct DESC;`},
+
+{db:'mercado', level:3, title:'Media móvil de 20 ruedas',
+ ask:'Para <code>IDX</code>, mostrá las <strong>últimas 10 ruedas</strong> con su cierre y la media móvil de los 20 cierres previos incluyendo el día. Columnas: <code>date</code>, <code>close</code>, <code>mm20</code> redondeada a 2 decimales, en orden cronológico.',
+ teaches:'La ventana deslizante. Una media móvil suaviza el ruido, pero también <em>retrasa</em> la señal: por eso cruzarla con el precio avisa tarde.',
+ hint:'<code>AVG(close) OVER (ORDER BY date ROWS BETWEEN 19 PRECEDING AND CURRENT ROW)</code>. Calculá sobre toda la serie y recién después quedate con las últimas 10.',
+ ordered:true,
+ sql:`WITH mm AS (
+  SELECT date, close,
+         AVG(close) OVER (ORDER BY date ROWS BETWEEN 19 PRECEDING AND CURRENT ROW) AS mm20
+  FROM prices WHERE ticker = 'IDX'
+)
+SELECT date, close, ROUND(mm20, 2) AS mm20
+FROM (SELECT * FROM mm ORDER BY date DESC LIMIT 10)
+ORDER BY date;`},
+
+{db:'mercado', level:3, title:'Los cinco peores días',
+ ask:'Calculá el retorno diario de <code>BANK</code> contra el cierre anterior y devolvé las 5 peores ruedas: <code>date</code>, <code>close</code> y <code>ret_pct</code> redondeado a 2 decimales, de peor a mejor.',
+ teaches:'<code>LAG</code> para comparar una fila con la anterior. Los retornos, no los precios, son lo que se analiza: son comparables entre activos y aproximadamente estacionarios.',
+ hint:'<code>LAG(close) OVER (ORDER BY date)</code> te da el cierre previo. La primera fila queda en <code>NULL</code> y se descarta sola al ordenar.',
+ ordered:true,
+ sql:`WITH r AS (
+  SELECT date, close, LAG(close) OVER (ORDER BY date) AS prev
+  FROM prices WHERE ticker = 'BANK'
+)
+SELECT date, close, ROUND((close / prev - 1) * 100, 2) AS ret_pct
+FROM r
+WHERE prev IS NOT NULL
+ORDER BY ret_pct ASC
+LIMIT 5;`},
+
+{db:'mercado', level:4, title:'Máxima caída desde el pico',
+ ask:'Por cada activo, el <strong>peor drawdown</strong> del período: la mayor caída porcentual desde el máximo acumulado hasta ese momento. Columnas: <code>ticker</code> y <code>max_drawdown_pct</code> (negativo, 2 decimales), del peor al menos malo.',
+ teaches:'El drawdown es la medida de riesgo que la gente siente de verdad. Necesita un máximo acumulado — una ventana que crece — y es el ejercicio donde se entiende para qué existen las window functions.',
+ hint:'<code>MAX(close) OVER (PARTITION BY ticker ORDER BY date ROWS UNBOUNDED PRECEDING)</code> es el pico hasta ese día. Después, el mínimo de <code>close/pico - 1</code> por ticker.',
+ ordered:true,
+ sql:`WITH picos AS (
+  SELECT ticker, date, close,
+         MAX(close) OVER (PARTITION BY ticker ORDER BY date ROWS UNBOUNDED PRECEDING) AS pico
+  FROM prices
+)
+SELECT ticker, ROUND(MIN(close / pico - 1) * 100, 2) AS max_drawdown_pct
+FROM picos
+GROUP BY ticker
+ORDER BY max_drawdown_pct ASC;`},
+
+{db:'mercado', level:4, title:'P&L del portafolio',
+ ask:'Para cada posición de <code>positions</code>: <code>ticker</code>, <code>quantity</code>, <code>buy_price</code>, el precio de cierre del último día (<code>precio_hoy</code>) y el <code>pnl</code> en pesos redondeado a 2 decimales, ordenado por <code>pnl</code> descendente.',
+ teaches:'Unir una tabla de hechos con el último estado de otra. Es la forma de casi todo reporte de posición, inventario o saldo.',
+ hint:'Uní <code>positions</code> con <code>prices</code> filtrando por la fecha máxima. El P&L es <code>(precio_hoy - buy_price) * quantity</code>.',
+ ordered:true,
+ sql:`SELECT po.ticker, po.quantity, po.buy_price, pr.close AS precio_hoy,
+       ROUND((pr.close - po.buy_price) * po.quantity, 2) AS pnl
+FROM positions po
+JOIN prices pr ON pr.ticker = po.ticker
+WHERE pr.date = (SELECT MAX(date) FROM prices)
+ORDER BY pnl DESC;`},
+
+/* ---------------------------- TIENDA ---------------------------- */
+{db:'tienda', level:1, title:'Facturación por país',
+ ask:'De las órdenes <code>completed</code>: cantidad de órdenes e ingreso total (<code>revenue</code>) por país del cliente. Columnas <code>country</code>, <code>ordenes</code>, <code>ingreso</code> (2 decimales), de mayor a menor ingreso.',
+ teaches:'El join más común del mundo: hechos con dimensión. Y el filtro que casi todos olvidan — las órdenes canceladas y devueltas no son facturación.',
+ hint:'<code>JOIN customers</code> por <code>customer_id</code>, filtrá <code>status = \'completed\'</code> y agrupá por país.',
+ ordered:true,
+ sql:`SELECT c.country,
+       COUNT(*) AS ordenes,
+       ROUND(SUM(o.revenue), 2) AS ingreso
+FROM orders o
+JOIN customers c ON c.customer_id = o.customer_id
+WHERE o.status = 'completed'
+GROUP BY c.country
+ORDER BY ingreso DESC;`},
+
+{db:'tienda', level:2, title:'Ticket promedio por canal',
+ ask:'Ticket promedio (<code>revenue</code> de órdenes <code>completed</code>) por canal de adquisición del cliente. Columnas: <code>channel</code>, <code>ordenes</code>, <code>aov</code> redondeado a 2 decimales. De mayor a menor AOV.',
+ teaches:'El AOV es la métrica que más se malinterpreta: un canal con AOV alto puede ser el que menos plata deja si trae pocos clientes. Fijate en las dos columnas juntas, nunca en una sola.',
+ hint:'<code>AVG(o.revenue)</code> agrupado por <code>c.channel</code>.',
+ ordered:true,
+ sql:`SELECT c.channel,
+       COUNT(*) AS ordenes,
+       ROUND(AVG(o.revenue), 2) AS aov
+FROM orders o
+JOIN customers c ON c.customer_id = o.customer_id
+WHERE o.status = 'completed'
+GROUP BY c.channel
+ORDER BY aov DESC;`},
+
+{db:'tienda', level:2, title:'Dónde está el margen',
+ ask:'Top 5 productos por <strong>margen bruto total</strong>, contando sólo ítems de órdenes <code>completed</code>. Columnas: <code>name</code>, <code>category</code>, <code>margen</code> redondeado a 2 decimales, de mayor a menor.',
+ teaches:'Facturar no es ganar. El producto que más vende y el que más margen deja rara vez son el mismo, y esa diferencia es la que decide qué se promociona.',
+ hint:'Margen por ítem = <code>(unit_price - unit_cost) * quantity</code>. Son tres tablas: <code>order_items</code> &rarr; <code>orders</code> &rarr; <code>products</code>.',
+ ordered:true,
+ sql:`SELECT p.name, p.category,
+       ROUND(SUM((oi.unit_price - oi.unit_cost) * oi.quantity), 2) AS margen
+FROM order_items oi
+JOIN orders o   ON o.order_id = oi.order_id
+JOIN products p ON p.product_id = oi.product_id
+WHERE o.status = 'completed'
+GROUP BY p.product_id, p.name, p.category
+ORDER BY margen DESC
+LIMIT 5;`},
+
+{db:'tienda', level:3, title:'Quién vuelve a comprar',
+ ask:'Por canal: cuántos clientes hicieron al menos una orden <code>completed</code>, cuántos hicieron dos o más, y la tasa de recompra en porcentaje (<code>tasa_pct</code>, 2 decimales). Ordenado por tasa descendente.',
+ teaches:'La métrica que revela la calidad de un canal. Un canal puede traer volumen barato y no retener nada: el CAC te miente si no mirás recompra al lado.',
+ hint:'Primero contá órdenes por cliente en un <code>CTE</code>; después agregá por canal usando <code>SUM(CASE WHEN ordenes >= 2 THEN 1 ELSE 0 END)</code>.',
+ ordered:true,
+ sql:`WITH por_cliente AS (
+  SELECT c.customer_id, c.channel, COUNT(*) AS n
+  FROM orders o
+  JOIN customers c ON c.customer_id = o.customer_id
+  WHERE o.status = 'completed'
+  GROUP BY c.customer_id, c.channel
+)
+SELECT channel,
+       COUNT(*) AS compradores,
+       SUM(CASE WHEN n >= 2 THEN 1 ELSE 0 END) AS recurrentes,
+       ROUND(100.0 * SUM(CASE WHEN n >= 2 THEN 1 ELSE 0 END) / COUNT(*), 2) AS tasa_pct
+FROM por_cliente
+GROUP BY channel
+ORDER BY tasa_pct DESC;`},
+
+{db:'tienda', level:3, title:'La primera compra',
+ ask:'Quedate con la <strong>primera orden completada</strong> de cada cliente y devolvé, por segmento: cantidad de clientes y ticket promedio de esa primera compra (<code>primer_ticket</code>, 2 decimales). Ordenado por segmento alfabéticamente.',
+ teaches:'Aislar el primer evento de cada entidad es el patrón que habilita cohortes, funnels y LTV. Con <code>ROW_NUMBER</code> se resuelve en cuatro líneas; sin ventanas, es un dolor.',
+ hint:'<code>ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date, order_id)</code> y después filtrá <code>= 1</code>.',
+ ordered:true,
+ sql:`WITH ord AS (
+  SELECT o.customer_id, o.revenue, c.segment,
+         ROW_NUMBER() OVER (PARTITION BY o.customer_id ORDER BY o.order_date, o.order_id) AS rn
+  FROM orders o
+  JOIN customers c ON c.customer_id = o.customer_id
+  WHERE o.status = 'completed'
+)
+SELECT segment,
+       COUNT(*) AS clientes,
+       ROUND(AVG(revenue), 2) AS primer_ticket
+FROM ord
+WHERE rn = 1
+GROUP BY segment
+ORDER BY segment;`},
+
+{db:'tienda', level:4, title:'Retención por cohorte',
+ ask:'Armá la tabla de cohortes: agrupá a los clientes por el <strong>mes de su primera compra completada</strong> y contá, para cada cantidad de meses transcurridos (0, 1, 2, &hellip;), cuántos de esa cohorte compraron. Columnas: <code>cohorte</code> (AAAA-MM), <code>mes_offset</code>, <code>clientes</code>. Ordenado por cohorte y después por offset.',
+ teaches:'El análisis de cohortes es el examen final del SQL de analista. Separa el efecto &laquo;el negocio crece&raquo; del efecto &laquo;la gente vuelve&raquo;, que en un total agregado se confunden siempre.',
+ hint:'Calculá el mes de la primera compra por cliente. El offset en meses se saca como <code>(año&times;12 + mes)</code> del período menos el mismo cálculo de la cohorte. Contá clientes <em>distintos</em>.',
+ ordered:true,
+ sql:`WITH primera AS (
+  SELECT customer_id, MIN(substr(order_date,1,7)) AS cohorte
+  FROM orders WHERE status = 'completed'
+  GROUP BY customer_id
+),
+actividad AS (
+  SELECT o.customer_id, p.cohorte, substr(o.order_date,1,7) AS mes
+  FROM orders o
+  JOIN primera p ON p.customer_id = o.customer_id
+  WHERE o.status = 'completed'
+)
+SELECT cohorte,
+       (CAST(substr(mes,1,4) AS INTEGER)*12 + CAST(substr(mes,6,2) AS INTEGER))
+     - (CAST(substr(cohorte,1,4) AS INTEGER)*12 + CAST(substr(cohorte,6,2) AS INTEGER)) AS mes_offset,
+       COUNT(DISTINCT customer_id) AS clientes
+FROM actividad
+GROUP BY cohorte, mes_offset
+ORDER BY cohorte, mes_offset;`},
+
+{db:'tienda', level:4, title:'Costo de adquisición por canal',
+ ask:'Por canal pago (<code>paid_search</code>, <code>paid_social</code>, <code>email</code>): inversión total, clientes nuevos captados en el período y CAC (<code>cac</code> = inversión / clientes nuevos, 2 decimales). Ordenado por CAC ascendente.',
+ teaches:'El CAC parece una división trivial hasta que tenés que decidir el denominador: ¿clientes registrados o clientes que compraron? La respuesta cambia el número y la decisión.',
+ hint:'Usá <code>signup_date</code> de <code>customers</code> para contar altas por canal y sumá <code>marketing_spend</code> por canal. Son dos agregados independientes que se cruzan por <code>channel</code>.',
+ ordered:true,
+ sql:`WITH gasto AS (
+  SELECT channel, SUM(spend) AS inversion
+  FROM marketing_spend GROUP BY channel
+),
+altas AS (
+  SELECT channel, COUNT(*) AS nuevos
+  FROM customers GROUP BY channel
+)
+SELECT g.channel,
+       ROUND(g.inversion, 2) AS inversion,
+       a.nuevos,
+       ROUND(g.inversion / a.nuevos, 2) AS cac
+FROM gasto g
+JOIN altas a ON a.channel = g.channel
+ORDER BY cac ASC;`}
+];
+</script>
+<script>
+/* =====================================================================
+   Casos de criterio: el SQL está bien, la lectura puede estar mal.
+   ===================================================================== */
+const CASES = [
+{
+ tag:'Sesgo de supervivencia',
+ scenario:'Backtesteás una estrategia sobre <b>las 100 acciones que hoy componen el índice</b>, con 10 años de historia. Da 14,2% anual contra 9,1% del índice. La query está impecable y los datos de precios son correctos.',
+ options:[
+  {t:'Publicar el resultado con la advertencia estándar de que rendimientos pasados no garantizan futuros.', ok:false,
+   why:'La advertencia es cierta pero irrelevante acá: el problema no es que el pasado no se repita, es que ese pasado nunca existió. Nadie podía comprar en 2016 la lista de las que iban a sobrevivir hasta 2026.'},
+  {t:'Rehacer el backtest con la composición del índice tal como era en cada fecha, incluyendo las empresas que después salieron o quebraron.', ok:true,
+   why:'Exacto. La muestra se armó con información del futuro. Necesitás la composición histórica punto a punto — y si esos datos no existen, el backtest no se puede hacer y hay que decirlo.'},
+  {t:'Ampliar a 500 acciones para que la muestra sea más grande y el resultado más robusto.', ok:false,
+   why:'Más datos del mismo tipo amplifican el sesgo en vez de corregirlo. Un sesgo sistemático no se diluye con volumen: 500 supervivientes siguen siendo 500 supervivientes.'}
+ ],
+ lesson:'Antes de mirar el resultado, preguntá cómo entró cada fila a la muestra. Si el criterio de inclusión usa información posterior al período analizado, el número está contaminado sin importar cuán prolijo sea el cálculo.'
+},
+{
+ tag:'Paradoja de Simpson',
+ scenario:'Un test A/B de checkout. En <b>escritorio</b> la variante B convierte mejor que A. En <b>celular</b> B también convierte mejor que A. Pero en el <b>total agregado</b>, B convierte peor. Verificás los números tres veces y están bien.',
+ options:[
+  {t:'Hay un error de cálculo en algún lado: es aritméticamente imposible.', ok:false,
+   why:'Es perfectamente posible, y tiene nombre. Pasa cuando el mix cambia: si B recibió proporcionalmente muchos más usuarios de celular — que convierte peor en general — el promedio total se le hunde aunque gane en cada segmento.'},
+  {t:'Reportar el total, que es la métrica de negocio, y anotar los segmentos como color adicional.', ok:false,
+   why:'Elegir el agregado por default es justo lo que la paradoja castiga. Si la mezcla de dispositivos difiere entre ramas, el total está midiendo la asignación, no el efecto del cambio.'},
+  {t:'Revisar cómo se repartió el tráfico entre ramas por dispositivo antes de leer cualquier resultado.', ok:true,
+   why:'Correcto. La causa casi siempre es una asignación desbalanceada. Verificado eso, se lee por segmento o se ajusta el total por la composición — pero primero se entiende el desbalanceo, porque además suele indicar un bug en el experimento.'}
+ ],
+ lesson:'Cuando el total contradice a todos los segmentos, el sospechoso es la composición de la muestra, no la aritmética. Y un desbalanceo de asignación en un A/B suele ser un problema técnico, no estadístico.'
+},
+{
+ tag:'Media contra mediana',
+ scenario:'El ticket promedio del trimestre subió 12%. En la misma consulta, la <b>mediana</b> del ticket bajó 4%. Dirección te pide una lectura para decidir si el cambio de precios funcionó.',
+ options:[
+  {t:'El precio funcionó: el promedio es la métrica que se traduce a facturación.', ok:false,
+   why:'La facturación total sí depende del promedio, pero atribuir la suba al cambio de precios sin explicar la caída de la mediana es contar la mitad. El promedio pudo subir por unas pocas órdenes enormes.'},
+  {t:'Mirar la distribución completa: percentiles y peso de la cola alta, antes de dar una lectura.', ok:true,
+   why:'Sí. Media arriba y mediana abajo describe una distribución que se estiró por la derecha: el cliente típico está gastando menos y unos pocos compensan. Los percentiles 25/50/75/90 te dicen en dos minutos si es eso.'},
+  {t:'Usar la mediana porque es más robusta a outliers y descartar el promedio.', ok:false,
+   why:'Robusta no es lo mismo que correcta para la pregunta. Si lo que se decide es facturación, ignorar la cola alta borra justo a los clientes que la sostienen. La respuesta no es elegir una: es mostrar las dos y explicar la brecha.'}
+ ],
+ lesson:'Media y mediana que se mueven en direcciones opuestas no son un conflicto a resolver eligiendo: son la señal más barata que existe de que la distribución cambió de forma. Esa forma es el hallazgo.'
+},
+{
+ tag:'Comparaciones múltiples',
+ scenario:'Un test sin efecto global. Cortás por 18 segmentos buscando dónde funcionó y encontrás uno — usuarios nuevos de Chile en celular — con <b>+21% y p = 0,03</b>. Marketing quiere lanzar ya para ese segmento.',
+ options:[
+  {t:'Es significativo con el umbral estándar de 0,05, así que se puede lanzar acotado a ese segmento.', ok:false,
+   why:'Con 18 cortes, encontrar al menos un p &lt; 0,05 por puro azar es más probable que no encontrarlo (alrededor del 60%). El umbral de 0,05 vale para una hipótesis definida antes de mirar, no para la mejor de dieciocho.'},
+  {t:'Tratarlo como hipótesis nueva y testearla de forma dirigida antes de decidir.', ok:true,
+   why:'Correcto. Explorar segmentos está bien; lo que no vale es cobrarle a la exploración el rigor de una confirmación. El hallazgo genera una hipótesis, y esa hipótesis se prueba con su propio test.'},
+  {t:'Corregir el p-valor por comparaciones múltiples y decidir con el resultado corregido.', ok:false,
+   why:'Va en la dirección correcta y con Bonferroni ese 0,03 dejaría de ser significativo, así que al menos frena el lanzamiento. Pero la corrección sobre un segmento elegido después de mirar sigue siendo frágil: el segmento se seleccionó por ser el máximo. Confirmalo aparte.'}
+ ],
+ lesson:'Cuantas más veces preguntás, más seguido el azar te contesta que sí. Anotá cuántos cortes miraste: ese número es parte del resultado y casi nunca aparece en el reporte.'
+},
+{
+ tag:'Instrumentación',
+ scenario:'El evento &laquo;agregó al carrito&raquo; cae <b>31% de un martes a un miércoles</b> y se queda ahí. Ventas no se movió. Te piden con urgencia una explicación del derrumbe de intención de compra.',
+ options:[
+  {t:'Cruzar con campañas, estacionalidad y competencia para explicar la caída de intención.', ok:false,
+   why:'Ninguna de esas causas produce un escalón de un día para el otro que además no toca ventas. Estarías buscando una explicación de negocio para lo que tiene toda la cara de ser un problema de medición.'},
+  {t:'Preguntar qué se deployó el martes y si cambió el disparo del evento antes de analizar nada.', ok:true,
+   why:'Sí. Caída abrupta + métrica de resultado intacta = casi siempre instrumentación. Un cambio de nombre de evento, un botón que dejó de disparar el tag, un bloqueador nuevo. Se descarta en una conversación de cinco minutos.'},
+  {t:'Esperar dos semanas de datos para confirmar que la caída es sostenida antes de investigar.', ok:false,
+   why:'Esperar no agrega información sobre la causa y sí agrega dos semanas de datos rotos que después alguien va a usar. Si es un bug de tracking, cada día que pasa es dato perdido.'}
+ ],
+ lesson:'Antes de explicar un movimiento, preguntá si lo que cambió fue el mundo o el instrumento. Los escalones bruscos en una sola métrica, sin correlato en las métricas de resultado, son medición hasta que se demuestre lo contrario.'
+},
+{
+ tag:'Causalidad y confusión',
+ scenario:'Los clientes que usan la función de listas guardadas retienen a 6 meses <b>3,4 veces más</b> que los que no la usan. Producto propone empujar la función a todos con un tutorial obligatorio.',
+ options:[
+  {t:'El tamaño del efecto es grande y consistente: alcanza para justificar el empujón.', ok:false,
+   why:'El tamaño del efecto no dice nada sobre su dirección causal. Un efecto enorme en datos observacionales suele ser señal de confusión fuerte, no de causalidad fuerte.'},
+  {t:'Es casi seguro al revés: los clientes que ya iban a quedarse son los que se toman el trabajo de armar listas.', ok:true,
+   why:'Esa es la lectura por defecto y hay que descartarla primero. La función es un marcador de intención previa. Empujarla a quien no tenía esa intención puede no mover nada — el marcador no es la causa.'},
+  {t:'Controlar por antigüedad y plan para aislar el efecto de la función.', ok:false,
+   why:'Ayuda, pero no alcanza: el confusor principal — cuánta intención de quedarse traía el cliente — no está en ninguna columna. Controlar por lo que podés medir no elimina lo que no medís. Acá el camino corto es un experimento.'}
+ ],
+ lesson:'En datos observacionales, la pregunta no es &laquo;¿están correlacionados?&raquo; sino &laquo;¿quién eligió estar en cada grupo y por qué?&raquo;. Si la gente se autoseleccionó, estás midiendo la selección.'
+},
+{
+ tag:'El denominador',
+ scenario:'La encuesta de satisfacción da <b>4,6 sobre 5</b>, el mejor número histórico. La respondió el 7% de los clientes, y se envía por mail a quienes abrieron la app en los últimos 30 días.',
+ options:[
+  {t:'Reportar 4,6 aclarando la tasa de respuesta del 7% al pie.', ok:false,
+   why:'La aclaración al pie no cambia que el titular es engañoso. Y el problema no es sólo el 7%: es que el universo ya excluía a todos los que se fueron, que son justamente los insatisfechos.'},
+  {t:'Decir que el número mide la satisfacción de los usuarios activos y comprometidos, no la de la base de clientes.', ok:true,
+   why:'Correcto, y es la corrección más importante: nombrar bien la población. Ese 4,6 es real para quienes usan la app y además contestan encuestas. Presentado así, sigue siendo útil y deja de ser una afirmación falsa sobre el total.'},
+  {t:'Ponderar las respuestas por país y segmento para que representen a la base.', ok:false,
+   why:'La ponderación corrige desbalanceos de composición entre gente que respondió, pero no puede recuperar a quien nunca entró al universo. Los clientes que abandonaron no están en ninguna celda que puedas repesar.'}
+ ],
+ lesson:'Toda métrica es un cociente, y el denominador es donde se esconden las decisiones. Antes de dar un número, decí en voz alta sobre qué población es cierto — si la frase suena rara, el número está mal encuadrado.'
+},
+{
+ tag:'Ley de Goodhart',
+ scenario:'Soporte adopta &laquo;tiempo hasta la primera respuesta&raquo; como métrica del equipo, con objetivo bajo dos horas. A los tres meses el tiempo cayó de 9 a 1,4 horas. La <b>satisfacción post-ticket bajó 8 puntos</b> y los tickets reabiertos subieron 40%.',
+ options:[
+  {t:'La métrica funcionó; la caída de satisfacción viene de otro lado y hay que investigarla aparte.', ok:false,
+   why:'Reabiertos +40% junto con primera respuesta a la baja es el patrón clásico de respuestas rápidas y vacías para frenar el reloj. Tratarlos como fenómenos separados es no leer lo que los dos números dicen juntos.'},
+  {t:'La métrica se volvió el objetivo y se optimizó a costa de resolver: hay que medir resolución, no primera respuesta.', ok:true,
+   why:'Sí. Cuando una medida se vuelve objetivo, deja de ser buena medida. Un &laquo;ya lo estamos viendo&raquo; automático cumple el target sin ayudar a nadie. Lo que importa es tiempo hasta resolución y tasa de reapertura.'},
+  {t:'Sumar un objetivo de satisfacción además del de tiempo, para equilibrar los incentivos.', ok:false,
+   why:'Mejor que no hacer nada, pero apilar objetivos sobre una métrica mal elegida agrega complejidad sin arreglar el incentivo de fondo. Primero se corrige qué se mide; después, si hace falta, se agregan contrapesos.'}
+ ],
+ lesson:'Cuando propongas una métrica, preguntate cómo la haría subir alguien que quisiera hacer trampa. Si la respuesta es fácil y no ayuda al negocio, elegí otra métrica antes de que alguien la descubra sin querer.'
+}
+];
+</script>
+<script>
+/* =====================================================================
+   Motor: SQLite (build asm.js, sin descarga de wasm) + comparación de resultados
+   ===================================================================== */
+const SOURCES = [
+  'https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/sql-asm.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.13.0/sql-asm.js',
+  'https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-asm.js'
+];
+function loadScript(src){
+  return new Promise((ok,fail)=>{
+    const s=document.createElement('script'); s.src=src; s.async=true;
+    s.onload=()=>ok(src); s.onerror=()=>fail(new Error('no cargó '+src));
+    document.head.appendChild(s);
+  });
+}
+async function loadEngine(){
+  let last;
+  for(const src of SOURCES){
+    try{ await loadScript(src); if(window.initSqlJs) return window.initSqlJs(); }
+    catch(e){ last=e; }
+  }
+  throw last || new Error('sin motor');
+}
+
+const DDL = {
+mercado:`
+CREATE TABLE assets(ticker TEXT PRIMARY KEY, name TEXT, asset_class TEXT, region TEXT, dividend_yield REAL);
+CREATE TABLE prices(ticker TEXT, date TEXT, open REAL, high REAL, low REAL, close REAL, volume INTEGER);
+CREATE TABLE dividends(ticker TEXT, ex_date TEXT, amount REAL);
+CREATE TABLE positions(position_id INTEGER, ticker TEXT, buy_date TEXT, quantity INTEGER, buy_price REAL);
+CREATE INDEX ix_p ON prices(ticker, date);`,
+tienda:`
+CREATE TABLE customers(customer_id INTEGER PRIMARY KEY, signup_date TEXT, country TEXT, channel TEXT, segment TEXT);
+CREATE TABLE products(product_id INTEGER PRIMARY KEY, name TEXT, category TEXT, unit_cost REAL, list_price REAL);
+CREATE TABLE orders(order_id INTEGER PRIMARY KEY, customer_id INTEGER, order_date TEXT, status TEXT, revenue REAL, discount REAL, shipping_cost REAL);
+CREATE TABLE order_items(item_id INTEGER PRIMARY KEY, order_id INTEGER, product_id INTEGER, quantity INTEGER, unit_price REAL, unit_cost REAL);
+CREATE TABLE marketing_spend(month TEXT, channel TEXT, spend REAL);
+CREATE INDEX ix_o ON orders(customer_id, order_date);`
+};
+
+const SCHEMA_DOC = {
+mercado:[
+ {t:'assets',    c:['ticker','name','asset_class','region','dividend_yield'], d:'8 instrumentos'},
+ {t:'prices',    c:['ticker','date','open','high','low','close','volume'],    d:'ruedas diarias'},
+ {t:'dividends', c:['ticker','ex_date','amount'],                             d:'pagos trimestrales'},
+ {t:'positions', c:['position_id','ticker','buy_date','quantity','buy_price'],d:'portafolio'}
+],
+tienda:[
+ {t:'customers',       c:['customer_id','signup_date','country','channel','segment'], d:'620 clientes'},
+ {t:'orders',          c:['order_id','customer_id','order_date','status','revenue','discount','shipping_cost'], d:'órdenes'},
+ {t:'order_items',     c:['item_id','order_id','product_id','quantity','unit_price','unit_cost'], d:'líneas'},
+ {t:'products',        c:['product_id','name','category','unit_cost','list_price'], d:'24 productos'},
+ {t:'marketing_spend', c:['month','channel','spend'], d:'inversión mensual'}
+]};
+
+const DB = {};
+let MARKET=null, SHOP=null;
+
+function bulk(db, sql, rows){
+  const st=db.prepare(sql);
+  db.run('BEGIN');
+  for(const r of rows) st.run(r);
+  db.run('COMMIT');
+  st.free();
+}
+
+function buildDatabases(SQL){
+  MARKET = buildMarket();
+  SHOP   = buildShop();
+
+  const m = new SQL.Database(); m.run(DDL.mercado);
+  bulk(m,'INSERT INTO assets VALUES (?,?,?,?,?)', ASSETS.map(a=>[a.ticker,a.name,a.asset_class,a.region,a.yld]));
+  bulk(m,'INSERT INTO prices VALUES (?,?,?,?,?,?,?)', MARKET.prices);
+  bulk(m,'INSERT INTO dividends VALUES (?,?,?)', MARKET.divs);
+  bulk(m,'INSERT INTO positions VALUES (?,?,?,?,?)', MARKET.pos);
+  DB.mercado = m;
+
+  const t = new SQL.Database(); t.run(DDL.tienda);
+  bulk(t,'INSERT INTO customers VALUES (?,?,?,?,?)', SHOP.customers);
+  bulk(t,'INSERT INTO products VALUES (?,?,?,?,?)', SHOP.products);
+  bulk(t,'INSERT INTO orders VALUES (?,?,?,?,?,?,?)', SHOP.orders);
+  bulk(t,'INSERT INTO order_items VALUES (?,?,?,?,?,?)', SHOP.items);
+  bulk(t,'INSERT INTO marketing_spend VALUES (?,?,?)', SHOP.spend);
+  DB.tienda = t;
+}
+
+function runSQL(dbKey, sql){
+  const db=DB[dbKey];
+  const res=db.exec(sql);
+  if(!res.length) return {cols:[], rows:[], empty:true};
+  const last=res[res.length-1];
+  return {cols:last.columns, rows:last.values, empty:false};
+}
+
+/* --- comparación tolerante a caminos distintos, estricta con los valores --- */
+function norm(v){
+  if(v===null||v===undefined) return '␀';
+  if(typeof v==='number') return Number.isInteger(v)? String(v) : String(Math.round(v*1e6)/1e6);
+  if(v instanceof Uint8Array) return '[blob]';
+  return String(v);
+}
+function rowKey(r){ return r.map(norm).join('␟'); }
+function numOrNull(v){ return typeof v==='number' ? v : (v===null?null:(isFinite(Number(v))&&v!==''?Number(v):null)); }
+
+function compare(user, ref, ordered){
+  if(user.empty) return {ok:false, msg:'Tu consulta no devolvió ningún cuadro de resultados.',
+    why:'Puede que sea una sentencia sin <code>SELECT</code>, o que haya quedado sólo un comentario.'};
+  if(user.cols.length !== ref.cols.length)
+    return {ok:false, msg:`Devolvés ${user.cols.length} columna${user.cols.length===1?'':'s'} y se esperan ${ref.cols.length}.`,
+      why:'Los nombres pueden ser los que quieras, pero la cantidad y el orden de las columnas tienen que coincidir con lo que pide el enunciado.'};
+  if(user.rows.length !== ref.rows.length){
+    const more = user.rows.length > ref.rows.length;
+    return {ok:false, msg:`Devolvés ${user.rows.length} fila${user.rows.length===1?'':'s'} y se esperan ${ref.rows.length}.`,
+      why: more
+        ? 'Sobran filas: revisá si falta un filtro, un <code>GROUP BY</code> o un <code>LIMIT</code> — o si un <code>JOIN</code> te está duplicando filas.'
+        : 'Faltan filas: puede que un filtro esté de más, que un <code>INNER JOIN</code> esté descartando lo que no matchea, o que <code>NULL</code> te esté comiendo casos.'};
+  }
+  const A = ordered ? user.rows : user.rows.slice().sort((x,y)=>rowKey(x)<rowKey(y)?-1:1);
+  const B = ordered ? ref.rows  : ref.rows.slice().sort((x,y)=>rowKey(x)<rowKey(y)?-1:1);
+  for(let i=0;i<A.length;i++){
+    for(let j=0;j<A[i].length;j++){
+      const a=A[i][j], b=B[i][j];
+      const na=numOrNull(a), nb=numOrNull(b);
+      if(na!==null && nb!==null){
+        const tol = Math.max(1e-9, Math.abs(nb)*1e-9);
+        if(Math.abs(na-nb) <= tol) continue;
+        const rel = nb!==0 ? Math.abs(na-nb)/Math.abs(nb) : 1;
+        const cerca = rel < 0.02;
+        return {ok:false,
+          msg:`Fila ${i+1}, columna ${j+1}: tenés <code>${norm(a)}</code> y se espera <code>${norm(b)}</code>.`,
+          why: cerca
+            ? 'Está muy cerca: casi seguro es el redondeo. El enunciado pide 2 decimales — usá <code>ROUND(expresión, 2)</code>.'
+            : 'El cálculo difiere. Revisá el filtro, el denominador y si estás agrupando por lo que corresponde.'};
+      }
+      if(norm(a)!==norm(b)){
+        return {ok:false,
+          msg:`Fila ${i+1}, columna ${j+1}: tenés <code>${norm(a)}</code> y se espera <code>${norm(b)}</code>.`,
+          why: ordered ? 'Si los valores existen pero en otro orden, revisá el <code>ORDER BY</code>.' : 'Revisá el valor de esa celda.'};
+      }
+    }
+  }
+  return {ok:true};
+}
+</script>
+<style>
+:root{--s1:#067A57; --s2:#C2410C; --s3:#2563EB}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--s1:#12A87A; --s2:#DD6B20; --s3:#4C8DE0}}
+:root[data-theme="dark"]{--s1:#12A87A; --s2:#DD6B20; --s3:#4C8DE0}
+</style>
+<script>
+/* =====================================================================
+   Interfaz
+   ===================================================================== */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+EXERCISES.forEach((e,i)=>{ e.id = e.db+'-'+i; });
+const KEY='qc-progress-v1';
+const state = {db:'mercado', idx:0, solved:new Set(), cases:{}, drafts:{}};
+
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify({solved:[...state.solved], cases:state.cases})); }catch(e){}
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(KEY); if(!raw) return;
+    const o=JSON.parse(raw);
+    (o.solved||[]).forEach(id=>state.solved.add(id));
+    state.cases = o.cases||{};
+  }catch(e){}
+}
+function meter(){
+  const total = EXERCISES.length + CASES.length;
+  const done  = state.solved.size + Object.keys(state.cases).length;
+  $('#meter-fill').style.width = (total? done/total*100 : 0)+'%';
+  $('#meter-num').textContent = done+' / '+total;
+}
+
+/* ------------------------------ tema ------------------------------ */
+function currentTheme(){
+  const t=document.documentElement.getAttribute('data-theme');
+  if(t) return t;
+  return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+}
+function themeLabel(){
+  const t=document.documentElement.getAttribute('data-theme');
+  $('#theme-toggle').textContent = t==='dark' ? 'Oscuro' : t==='light' ? 'Claro' : 'Automático';
+}
+$('#theme-toggle').addEventListener('click',()=>{
+  const now=document.documentElement.getAttribute('data-theme');
+  const next = now==='dark' ? 'light' : now==='light' ? '' : 'dark';
+  if(next) document.documentElement.setAttribute('data-theme',next);
+  else document.documentElement.removeAttribute('data-theme');
+  try{ localStorage.setItem('qc-theme', next); }catch(e){}
+  themeLabel();
+  if(DB.mercado) renderFigure();
+});
+try{ const t=localStorage.getItem('qc-theme'); if(t) document.documentElement.setAttribute('data-theme',t); }catch(e){}
+themeLabel();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{ if(DB.mercado) renderFigure(); });
+
+/* ------------------------------ navegación ------------------------------ */
+$$('#navlist button').forEach(b=>b.addEventListener('click',()=>{
+  const v=b.dataset.view;
+  $$('#navlist button').forEach(x=>x.setAttribute('aria-current', x===b?'true':'false'));
+  ['ruta','lab','criterio','terreno'].forEach(k=>{ $('#view-'+k).hidden = (k!==v); });
+  window.scrollTo({top:0, behavior:'instant'});
+}));
+
+/* ------------------------------ tabla de resultados ------------------------------ */
+function gridHTML(res, cap){
+  if(res.empty || !res.rows.length)
+    return `<div class="reshead"><span class="cap">${cap}</span><span class="cnt">0 filas</span></div>
+            <p class="note">La consulta corrió pero no devolvió filas.</p>`;
+  const shown = res.rows.slice(0,200);
+  const head = res.cols.map(c=>`<th>${esc(c)}</th>`).join('');
+  const body = shown.map(r=>'<tr>'+r.map(v=>{
+      if(v===null) return '<td class="null">NULL</td>';
+      if(typeof v==='number') return `<td class="num">${esc(Number.isInteger(v)?v:Math.round(v*1e6)/1e6)}</td>`;
+      return `<td>${esc(v)}</td>`;
+    }).join('')+'</tr>').join('');
+  const extra = res.rows.length>200 ? ` &middot; mostrando 200` : '';
+  return `<div class="reshead"><span class="cap">${cap}</span>
+            <span class="cnt">${res.rows.length} fila${res.rows.length===1?'':'s'} &middot; ${res.cols.length} col${extra}</span></div>
+          <div class="tablescroll"><table class="grid"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+}
+
+/* ------------------------------ ejercicios ------------------------------ */
+const exOf = db => EXERCISES.filter(e=>e.db===db);
+
+function renderExList(){
+  const list=exOf(state.db);
+  $('#ex-list').innerHTML = list.map((e,i)=>
+    `<button type="button" data-i="${i}" class="${state.solved.has(e.id)?'solved':''}"
+       aria-current="${i===state.idx}" title="${esc(e.title)}">${i+1}</button>`).join('');
+  $$('#ex-list button').forEach(b=>b.addEventListener('click',()=>{ stash(); state.idx=+b.dataset.i; renderEx(); }));
+  $('#ex-pos').textContent = (state.idx+1)+'/'+list.length;
+  $('#ex-prev').disabled = state.idx===0;
+  $('#ex-next').disabled = state.idx===list.length-1;
+}
+function stash(){
+  const ta=$('#sqlbox'); if(!ta) return;
+  const e=exOf(state.db)[state.idx]; if(e) state.drafts[e.id]=ta.value;
+}
+function renderEx(){
+  const e = exOf(state.db)[state.idx];
+  renderExList();
+  const draft = state.drafts[e.id] ?? '';
+  $('#ex-body').innerHTML = `
+    <div class="ex-head">
+      <div class="ex-meta">
+        <span class="tag lvl">Nivel ${e.level}</span>
+        <span class="tag">${e.db}</span>
+        ${state.solved.has(e.id)?'<span class="tag" style="color:var(--good)">resuelto</span>':''}
+      </div>
+      <h3>${e.title}</h3>
+      <p class="ex-ask">${e.ask}</p>
+      <p class="ex-teach"><b>Para qué</b>${e.teaches}</p>
+    </div>
+    <div class="editor">
+      <label for="sqlbox" style="position:absolute;left:-9999px">Consulta SQL</label>
+      <textarea id="sqlbox" spellcheck="false" placeholder="SELECT ...">${esc(draft)}</textarea>
+    </div>
+    <div class="runbar">
+      <button class="btn btn-primary" id="run">Ejecutar y comparar</button>
+      <button class="btn btn-ghost" id="clear">Limpiar</button>
+      <span class="runhint"><kbd>Ctrl</kbd>+<kbd>Enter</kbd></span>
+    </div>
+    <div id="verdict"></div>
+    <details class="disclose" id="d-hint"><summary>Pista</summary><div class="dbody"><p class="ex-teach" style="max-width:64ch">${e.hint}</p></div></details>
+    <details class="disclose" id="d-sol"><summary>Ver una solución</summary><div class="dbody">
+      <p class="note">Es <em>una</em> solución, no la única. Si tu query da el mismo cuadro, está bien.</p>
+      <pre class="sql">${esc(e.sql)}</pre>
+      <button class="btn btn-ghost" id="showexp" style="align-self:flex-start">Ver el resultado esperado</button>
+      <div id="expected"></div>
+    </div></details>
+    <div class="resultwrap" id="resultwrap" hidden></div>`;
+
+  const ta=$('#sqlbox');
+  ta.addEventListener('keydown',ev=>{ if((ev.ctrlKey||ev.metaKey)&&ev.key==='Enter'){ev.preventDefault();execute();} });
+  $('#run').addEventListener('click',execute);
+  $('#clear').addEventListener('click',()=>{ ta.value=''; ta.focus(); $('#verdict').innerHTML=''; $('#resultwrap').hidden=true; });
+  $('#showexp').addEventListener('click',()=>{
+    const ref=runSQL(e.db, e.sql);
+    $('#expected').innerHTML = `<div class="resultwrap" style="border:0;padding-top:6px">${gridHTML(ref,'Resultado esperado')}</div>`;
+    $('#showexp').disabled = true;
+  });
+}
+function execute(){
+  const e = exOf(state.db)[state.idx];
+  const sql = $('#sqlbox').value.trim();
+  const v = $('#verdict'), rw = $('#resultwrap');
+  if(!sql){ v.innerHTML=`<div class="verdict no"><span class="vh">Editor vacío</span><span class="why">Escribí una consulta y volvé a intentar.</span></div>`; return; }
+  let user;
+  try{ user = runSQL(e.db, sql); }
+  catch(err){
+    rw.hidden=true;
+    v.innerHTML=`<div class="verdict no"><span class="vh">SQLite rechazó la consulta</span>
+      <div class="errbox">${esc(err.message||String(err))}</div>
+      <span class="why">El motor es SQLite: no tiene <code>TOP</code>, ni <code>DATEADD</code>, ni <code>ISNULL</code>. Para fechas en texto usá <code>substr()</code>.</span></div>`;
+    return;
+  }
+  rw.hidden=false; rw.innerHTML = gridHTML(user,'Tu resultado');
+  const ref = runSQL(e.db, e.sql);
+  const r = compare(user, ref, e.ordered!==false);
+  if(r.ok){
+    if(!state.solved.has(e.id)){ state.solved.add(e.id); save(); meter(); renderExList(); }
+    v.innerHTML=`<div class="verdict ok"><span class="vh">Coincide</span>
+      <span class="why">Mismo cuadro que la solución de referencia: ${ref.rows.length} fila${ref.rows.length===1?'':'s'}, ${ref.cols.length} columna${ref.cols.length===1?'':'s'}.</span></div>`;
+  }else{
+    v.innerHTML=`<div class="verdict no"><span class="vh">Todavía no</span>
+      <span>${r.msg}</span><span class="why">${r.why}</span></div>`;
+  }
+}
+$('#ex-prev').addEventListener('click',()=>{ stash(); if(state.idx>0){state.idx--; renderEx();} });
+$('#ex-next').addEventListener('click',()=>{ stash(); if(state.idx<exOf(state.db).length-1){state.idx++; renderEx();} });
+$$('.dbtabs button').forEach(b=>b.addEventListener('click',()=>{
+  stash();
+  state.db=b.dataset.db; state.idx=0;
+  $$('.dbtabs button').forEach(x=>x.setAttribute('aria-pressed', x===b?'true':'false'));
+  renderEx(); renderSchema(); renderFigure();
+}));
+
+/* ------------------------------ esquema ------------------------------ */
+function renderSchema(){
+  const tabs=SCHEMA_DOC[state.db];
+  $('#schema').innerHTML = tabs.map(t=>{
+    let n='';
+    try{ n = runSQL(state.db, `SELECT COUNT(*) FROM ${t.t}`).rows[0][0].toLocaleString('es-AR'); }catch(e){}
+    return `<div class="stable">
+      <div class="tname">${t.t}<span class="rows">${n} filas</span></div>
+      <div class="cols">${t.c.map(c=>`<button type="button" data-col="${c}">${c}</button>`).join('')}</div>
+    </div>`;
+  }).join('');
+  $$('#schema button').forEach(b=>b.addEventListener('click',()=>{
+    const ta=$('#sqlbox'); if(!ta) return;
+    const p=ta.selectionStart ?? ta.value.length;
+    ta.value = ta.value.slice(0,p)+b.dataset.col+ta.value.slice(ta.selectionEnd ?? p);
+    ta.focus(); ta.selectionStart=ta.selectionEnd=p+b.dataset.col.length;
+  }));
+}
+</script>
+<script>
+/* ------------------------------ figuras ------------------------------ */
+const cssv = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function niceTicks(lo,hi,n){
+  const raw=(hi-lo)/n, mag=Math.pow(10,Math.floor(Math.log10(raw))), norm=raw/mag;
+  const step=(norm<1.5?1:norm<3?2:norm<7?5:10)*mag;
+  const out=[]; for(let v=Math.ceil(lo/step)*step; v<=hi+1e-9; v+=step) out.push(Math.round(v*1e6)/1e6);
+  return out;
+}
+const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const fmtMes = d => MES[+d.slice(5,7)-1]+" '"+d.slice(2,4);
+
+function lineChart(){
+  const SER=[{t:'IDX',c:cssv('--s1')},{t:'SEMI',c:cssv('--s2')},{t:'BOND',c:cssv('--s3')}];
+  const byT={};
+  for(const p of MARKET.prices){ (byT[p[0]] = byT[p[0]]||[]).push([p[1],p[5]]); }
+  const dates = byT.IDX.map(r=>r[0]);
+  const series = SER.map(s=>{ const base=byT[s.t][0][1];
+    return {...s, v: byT[s.t].map(r=>r[1]/base*100)}; });
+
+  const W=760,H=272,m={t:16,r:66,b:30,l:48}, iw=W-m.l-m.r, ih=H-m.t-m.b, n=dates.length;
+  let lo=Infinity,hi=-Infinity;
+  series.forEach(s=>s.v.forEach(v=>{lo=Math.min(lo,v);hi=Math.max(hi,v)}));
+  const pad=(hi-lo)*0.08; lo-=pad; hi+=pad;
+  const X=i=>m.l+i/(n-1)*iw, Y=v=>m.t+(1-(v-lo)/(hi-lo))*ih;
+  const ticks=niceTicks(lo,hi,4);
+  const rule=cssv('--rule'), ink3=cssv('--ink-3');
+
+  let g='';
+  ticks.forEach(t=>{ g+=`<line x1="${m.l}" y1="${Y(t).toFixed(1)}" x2="${m.l+iw}" y2="${Y(t).toFixed(1)}" stroke="${rule}" stroke-width="1"/>`
+    +`<text x="${m.l-9}" y="${(Y(t)+3.5).toFixed(1)}" text-anchor="end" fill="${ink3}" font-size="10.5" font-family="IBM Plex Mono, monospace">${t}</text>`; });
+  let xs='';
+  for(let i=1;i<n;i++){
+    if(dates[i].slice(5,7)!==dates[i-1].slice(5,7) && (+dates[i].slice(5,7))%2===1){
+      xs+=`<text x="${X(i).toFixed(1)}" y="${H-10}" text-anchor="middle" fill="${ink3}" font-size="10.5" font-family="IBM Plex Mono, monospace">${fmtMes(dates[i])}</text>`;
+    }
+  }
+  let paths='', dots='';
+  series.forEach(s=>{
+    paths+=`<path d="${s.v.map((v,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)).join(' ')}" fill="none" stroke="${s.c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    dots+=`<circle class="hv" data-t="${s.t}" r="4.5" fill="${s.c}" stroke="${cssv('--surface')}" stroke-width="2" opacity="0" cx="0" cy="0"/>`;
+  });
+  // etiquetas al final de cada línea, separadas para que no se pisen
+  const lab=series.map(s=>({t:s.t, c:s.c, y:Y(s.v[n-1])})).sort((a,b)=>a.y-b.y);
+  for(let i=1;i<lab.length;i++) if(lab[i].y-lab[i-1].y < 14) lab[i].y = lab[i-1].y + 14;
+  const labels = lab.map(l=>`<text x="${m.l+iw+8}" y="${(l.y+4).toFixed(1)}" fill="${l.c}" font-size="11.5" font-weight="600" font-family="IBM Plex Mono, monospace">${l.t}</text>`).join('');
+
+  return `<div class="figure">
+    <div class="figcap">
+      <h4>Las tres series, indexadas a 100</h4>
+      <p class="sub">Un ETF de 190 y una acción de 22 no se comparan por precio. Indexadas al primer día, sí: cada línea es cuánto valdrían 100 invertidos al inicio.</p>
+    </div>
+    <div class="legend">${series.map(s=>`<span><i style="background:${s.c}"></i>${s.t} &mdash; ${ASSETS.find(a=>a.ticker===s.t).name}</span>`).join('')}</div>
+    <div class="chartbox" id="cb">
+      <svg id="lc" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Evolución indexada a base 100 de IDX, SEMI y BOND">
+        ${g}${xs}
+        <line x1="${m.l}" y1="${m.t}" x2="${m.l}" y2="${m.t+ih}" stroke="${cssv('--rule-strong')}" stroke-width="1"/>
+        <line id="cross" x1="0" y1="${m.t}" x2="0" y2="${m.t+ih}" stroke="${cssv('--rule-strong')}" stroke-width="1" opacity="0"/>
+        ${paths}${labels}${dots}
+        <rect id="hit" x="${m.l}" y="${m.t}" width="${iw}" height="${ih}" fill="transparent" style="cursor:crosshair"/>
+      </svg>
+      <div class="tip" id="tip" hidden></div>
+    </div>
+    <p class="note">Series sintéticas generadas con un modelo calibrado (deriva, volatilidad y beta por tipo de activo), no cotizaciones reales. La mecánica de análisis es idéntica; los números no sirven para decidir una inversión.</p>
+  </div>`;
+}
+
+function wireLineChart(){
+  const svg=$('#lc'), hit=$('#hit'), tip=$('#tip'), cross=$('#cross'), box=$('#cb');
+  if(!svg) return;
+  const W=760,m={t:16,r:66,b:30,l:48}, iw=W-m.l-m.r;
+  const byT={}; for(const p of MARKET.prices){ (byT[p[0]] = byT[p[0]]||[]).push([p[1],p[5]]); }
+  const dates=byT.IDX.map(r=>r[0]), n=dates.length;
+  const SER=['IDX','SEMI','BOND'];
+  const idx = SER.map(t=>({t, base:byT[t][0][1], v:byT[t].map(r=>r[1])}));
+  const dots=$$('.hv',svg);
+  const COLS=['--s1','--s2','--s3'];
+  // misma escala que al dibujar, calculada una sola vez
+  let lo=Infinity,hi=-Infinity;
+  idx.forEach(s=>s.v.forEach(v=>{const x=v/s.base*100; lo=Math.min(lo,x); hi=Math.max(hi,x)}));
+  const pad0=(hi-lo)*0.08; lo-=pad0; hi+=pad0;
+  const ih=272-m.t-m.b;
+  function move(ev){
+    const r=svg.getBoundingClientRect();
+    const sx=(ev.clientX-r.left)/r.width*W;
+    let i=Math.round((sx-m.l)/iw*(n-1)); i=Math.max(0,Math.min(n-1,i));
+    const px=(m.l+i/(n-1)*iw);
+    cross.setAttribute('x1',px); cross.setAttribute('x2',px); cross.setAttribute('opacity','1');
+    const vals=idx.map(s=>s.v[i]/s.base*100);
+    dots.forEach((d,k)=>{
+      d.setAttribute('cx',px); d.setAttribute('opacity','1');
+      d.setAttribute('cy', m.t+(1-(vals[k]-lo)/(hi-lo))*ih);
+    });
+    tip.hidden=false;
+    tip.innerHTML=`<div class="d">${dates[i]}</div>`+idx.map((s,k)=>
+      `<div class="r"><span><i style="background:${cssv(COLS[k])}"></i>${s.t}</span><span>${vals[k].toFixed(1)}</span></div>`).join('');
+    const bx=box.getBoundingClientRect(), sr=svg.getBoundingClientRect();
+    tip.style.left=(sr.left-bx.left + px/W*sr.width)+'px';
+    tip.style.top =(sr.top-bx.top + 26)+'px';
+  }
+  hit.addEventListener('mousemove',move);
+  hit.addEventListener('touchmove',e=>{ if(e.touches[0]) move(e.touches[0]); },{passive:true});
+  hit.addEventListener('mouseleave',()=>{ tip.hidden=true; cross.setAttribute('opacity','0'); dots.forEach(d=>d.setAttribute('opacity','0')); });
+}
+
+const RAMP={
+  light:{bg:['#EAF2EE','#C9E3D8','#97CBB8','#52A98A','#067A57'], fg:['#55665F','#14201C','#14201C','#0B1F19','#F2F8F5']},
+  dark: {bg:['#1C2E28','#234439','#2C6B54','#0E8A67','#12A87A'], fg:['#93A69D','#C9DDD4','#E8F5EF','#08120E','#08120E']}
+};
+function heatmap(){
+  const q=`WITH primera AS (SELECT customer_id, MIN(substr(order_date,1,7)) AS cohorte
+    FROM orders WHERE status='completed' GROUP BY customer_id),
+  actividad AS (SELECT o.customer_id, p.cohorte, substr(o.order_date,1,7) AS mes
+    FROM orders o JOIN primera p ON p.customer_id=o.customer_id WHERE o.status='completed')
+  SELECT cohorte,
+    (CAST(substr(mes,1,4) AS INTEGER)*12+CAST(substr(mes,6,2) AS INTEGER))
+   -(CAST(substr(cohorte,1,4) AS INTEGER)*12+CAST(substr(cohorte,6,2) AS INTEGER)) AS off,
+    COUNT(DISTINCT customer_id) AS c
+  FROM actividad GROUP BY cohorte, off ORDER BY cohorte, off;`;
+  const res=runSQL('tienda',q);
+  const map={}, cohorts=[];
+  res.rows.forEach(([co,off,c])=>{ if(!map[co]){map[co]={}; cohorts.push(co);} map[co][off]=c; });
+  const MAXOFF=6, cs=cohorts.slice(0,8);
+  const ramp=RAMP[currentTheme()];
+  const step=p=> p<=0?0 : p<8?0 : p<16?1 : p<26?2 : p<40?3 : 4;
+
+  let head='<tr><th class="rowlab">cohorte</th><th>altas</th>';
+  for(let o=0;o<=MAXOFF;o++) head+=`<th>+${o}</th>`;
+  head+='</tr>';
+  let body='';
+  for(const co of cs){
+    const size=map[co][0]||0;
+    body+=`<tr><th class="rowlab">${co}</th><td class="empty">${size}</td>`;
+    for(let o=0;o<=MAXOFF;o++){
+      const c=map[co][o];
+      if(c===undefined||!size){ body+='<td class="empty">&middot;</td>'; continue; }
+      const pct=c/size*100, s=step(pct);
+      body+=`<td style="background:${ramp.bg[s]};color:${ramp.fg[s]}" title="${c} de ${size} clientes">${pct.toFixed(0)}%</td>`;
+    }
+    body+='</tr>';
+  }
+  return `<div class="figure">
+    <div class="figcap">
+      <h4>Retención por cohorte, mes a mes</h4>
+      <p class="sub">Cada fila es el grupo que compró por primera vez ese mes; cada columna, cuántos meses después. El ejercicio 6 de esta base reconstruye exactamente esta tabla desde cero.</p>
+    </div>
+    <div class="tablescroll" style="max-height:none"><table class="heat" style="margin:8px">${head}${body}</table></div>
+    <div class="scale"><span>menos retención</span><span class="ramp">${ramp.bg.map(c=>`<i style="background:${c}"></i>`).join('')}</span><span>más</span></div>
+    <p class="note">La columna <em>altas</em> es el tamaño de la cohorte; los porcentajes son sobre ese total. Datos sintéticos: los canales pagos se generaron con peor recompra a propósito, para que el análisis encuentre algo.</p>
+  </div>`;
+}
+
+function renderFigure(){
+  const slot=$('#dataset-figure'); if(!slot) return;
+  if(state.db==='mercado'){ slot.innerHTML=lineChart(); wireLineChart(); }
+  else { slot.innerHTML=heatmap(); }
+}
+
+/* ------------------------------ casos ------------------------------ */
+function renderCases(){
+  $('#cases').innerHTML = CASES.map((c,i)=>{
+    const picked = state.cases[i];
+    const done = picked!==undefined;
+    const opts = c.options.map((o,k)=>{
+      let cls='opt';
+      if(done){ if(k===picked) cls+= o.ok?' picked-ok':' picked-no'; else if(o.ok) cls+=' reveal-ok'; }
+      return `<button type="button" class="${cls}" data-c="${i}" data-o="${k}" ${done?'disabled':''}>
+        <span class="key">${String.fromCharCode(65+k)}</span>
+        <span>${o.t}${done?`<span class="why">${o.why}</span>`:''}</span></button>`;
+    }).join('');
+    return `<article class="panel"><div class="panel-b case">
+      <div class="ex-meta"><span class="tag lvl">${c.tag}</span>${done?`<span class="tag" style="color:${c.options[picked].ok?'var(--good)':'var(--rust)'}">${c.options[picked].ok?'acertaste':'revisá el porqué'}</span>`:''}</div>
+      <p class="scenario">${c.scenario}</p>
+      <div class="opts">${opts}</div>
+      ${done?`<p class="lesson"><span class="lbl">La regla</span>${c.lesson}</p>`:''}
+    </div></article>`;
+  }).join('');
+  $$('#cases .opt').forEach(b=>b.addEventListener('click',()=>{
+    state.cases[+b.dataset.c]=+b.dataset.o; save(); meter(); renderCases();
+  }));
+}
+
+/* ------------------------------ arranque ------------------------------ */
+$('#reset-progress').addEventListener('click',()=>{
+  state.solved.clear(); state.cases={}; save(); meter(); renderCases();
+  if(DB.mercado){ renderEx(); }
+});
+
+load(); meter(); renderCases();
+
+(async function boot(){
+  try{
+    const SQL = await loadEngine();
+    buildDatabases(SQL);
+    $('#boot').hidden=true; $('#lab').hidden=false;
+    $('#data-disclaimer').innerHTML='Las dos bases se generan en tu navegador con una semilla fija: son idénticas para cualquiera que abra esta página, y se rearman de cero en cada recarga. Nada se envía a ningún lado. El motor es SQLite &mdash; la misma sintaxis que usan DuckDB y la mayoría de los warehouses para lo que practicás acá.';
+    renderEx(); renderSchema(); renderFigure(); meter();
+  }catch(err){
+    $('#boot').innerHTML = `<div class="verdict no" style="margin:0"><span class="vh">No se pudo cargar el motor SQLite</span>
+      <span class="why">La página necesita bajar el motor desde un CDN y esta red parece estar bloqueándolo.
+      El resto de las secciones funciona igual; los enunciados y las soluciones de los ejercicios están abajo.</span></div>
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:14px">${
+        EXERCISES.map((e,i)=>`<div><h4 style="font-family:var(--f-display);font-size:15px">${i+1}. ${e.title} <span class="tag">${e.db}</span></h4>
+        <p class="ex-teach" style="margin:6px 0">${e.ask}</p><pre class="sql">${esc(e.sql)}</pre></div>`).join('')}</div>`;
+    $('#boot').classList.remove('loading');
+  }
+})();
+</script>
